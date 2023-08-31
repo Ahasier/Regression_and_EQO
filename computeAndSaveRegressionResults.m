@@ -19,11 +19,25 @@ initializePaths();
 % Extracting settings and paths
 [treeData, settings, fullIdentifier, resultsPath, betaResultsPath] = setupPathsAndSettings(varargin{:});
 
-% Handle based on real or synthetic data
-if usingRealData(settings)
-    results = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+% If on diagnostic mod, save results for diagnostics as well; otherwise
+% only save the main output results.
+if onDiagnosticMod(settings)
+    % Handle based on real or synthetic data
+    if usingRealData(settings)
+        [results, resultsForDiagnostics] = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    else
+        [results, resultsForDiagnostics] = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    end
+    
+    % Combine main output results with those for diagnostic uses.
+    results = combineResults(results, resultsForDiagnostics);
 else
-    results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    % Handle based on real or synthetic data
+    if usingRealData(settings)
+        results = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    else
+        results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    end
 end
 
 % Save results to disk
@@ -44,27 +58,41 @@ treeData = tree100;
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
 end
 
-function results = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
+function [results, resultsForDiagnostics] = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
 % Generate Data
 [abundanceData, functionalOutput] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
+[allCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Return results as a structure
-results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError);
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', crossValidatedOutSampleError);
+resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
 end
 
-function results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
+function [results, resultsForDiagnostics] = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
 % Generate Data
 [abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
+[allCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Calculate Accuracy
 accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);
 
 % Return results as a structure
-results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError,'accuracy', accuracy);
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', crossValidatedOutSampleError, 'accuracy', accuracy);
+resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
+end
+
+function isDiagnosticMod = onDiagnosticMod(settings)
+isDiagnosticMod = isfield(settings, 'DiagnosticMod') && strcmp(settings.DiagnosticMod, 'On');
+end
+
+function sCombined = combineResults(s1, s2)
+sCombined = s1;
+fields = fieldnames(s2);
+for i = 1:numel(fields)
+    sCombined.(fields{i}) = s2.(fields{i});
+end
 end
