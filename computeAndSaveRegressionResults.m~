@@ -1,7 +1,7 @@
 function computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, varargin)
 % COMPUTEANDSAVEREGRESSIONRESULTS Computes and saves the regression results.
 % 
-% INPUTS: 
+% INPUTS:
 %   numPermutations: Number of random permutations.
 %   phylogenyDependency: 0 if beta's are independent of phylogeny.
 %   noiseLevel: Noise level for regression.
@@ -21,11 +21,13 @@ initializePaths();
 
 % Handle based on real or synthetic data
 if usingRealData(settings)
-    processRealData(betaResultsPath, fullIdentifier, settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+    results = processRealData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
 else
     results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
-    saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples);
 end
+
+% Save results to disk
+saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid);
 end
 
 %% Helper functions
@@ -46,44 +48,23 @@ function results = processRealData(settings, treeData, numPermutations, phylogen
 % Generate Data
 [abundanceData, functionalOutput] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
-% Compute regressions on data
-[estimatedCoefficients, trainingSets, testSets] = computeRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+% Compute regression and cross-validation over different thresholds on data
+[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
-% Do cross-validation over different thresholds
-[crossValidatedCoefficients, squaredError, MSE, indexOfMSE, R2OutSample, R2InSample] = computeCrossValidation(abundanceData, functionalOutput, estimatedCoefficients, trainingSets, testSets, regressionMethod, settings.Beta);
-
-% Save results
-results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput,  'estimatedCoefficients', estimatedCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'squaredError', squaredError, 'MSE', MSE, 'indexOfMSE', indexOfMSE, 'R2OutSample', R2OutSample, 'R2InSample', R2InSample, 'accuracy', accuracy); 
+% Return results as a structure
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError);
 end
 
 function results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
-    % Generate Data
-    [abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
-    
-    % Compute regressions on data
-    [estimatedCoefficients, trainingSets, testSets] = computeRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
-    
-    % Do cross-validation over different thresholds
-    [crossValidatedCoefficients, squaredError, MSE, indexOfMSE, R2OutSample, R2InSample] = computeCrossValidation(abundanceData, functionalOutput, estimatedCoefficients, trainingSets, testSets, regressionMethod, settings.Beta0);
-    
-    % Calculate Accuracy
-    accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);
-    
-    % Return results as a structure
-    results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'estimatedCoefficients', estimatedCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'squaredError', squaredError, 'MSE', MSE, 'indexOfMSE', indexOfMSE, 'R2OutSample', R2OutSample, 'R2InSample', R2InSample, 'accuracy', accuracy);
-end
+% Generate Data
+[abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
-function doesDataNeedUpdate = dataNeedsUpdate(filename, numberOfTaxaInAGroup, numSamples)
-% Load or initialize existing accuracy results data
-existingData = loadOrInitializeAccuracyResultsFile(filename);
+% Compute regression and cross-validation over different thresholds on data
+[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
-% Compute indices to determine where the accuracy result will be stored
-[index1, index2] = indicesOfAccuracyMatrixElement(numberOfTaxaInAGroup, numSamples);
+% Calculate Accuracy
+accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);
 
-% Determine if data needs update
-if existingData(index1, index2) == 0 || isnan(existingData(index1, index2))
-    doesDataNeedUpdate = 1;
-else
-    doesDataNeedUpdate = 0;
-end
+% Return results as a structure
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError,'accuracy', accuracy);
 end

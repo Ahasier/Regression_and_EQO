@@ -1,6 +1,7 @@
-function [allCoefficientsAtAllThresholds, avgCoefficients, optimalThreshold, coefficientsStdDev, avgOutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, Beta0)
-allCoefficientsAtAllThresholds = [];
-allErrorsAtAllThresholds = [];
+function [allCoefficientsAtAllThresholds, allErrorsAtAllThresholds, avgCoefficients, optimalThreshold, coefficientsStdDev, avgOutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, Beta0)
+allCoefficientsAtAllThresholds = {};
+allErrorsAtAllThresholds = {};
+allR2AtAllThresholds = [];
 allCoefficients = [];
 allErrors = [];
 for i = 1:numPermutations
@@ -12,12 +13,13 @@ for i = 1:numPermutations
     inSampleError = computeSquaredError(trainingData, trainingOutput, coefficients); % For diagnostics
     
     % Step 3: Cross-validation on testing data
-    [coefficientsAtAllThresholds, outSampleErrorsAtAllThresholds, thresholdedCoefficients, outSampleError, optimalThreshold] = computeCrossValidation(testData, testOutput, coefficients, regressionMethod, Beta0);
+    [coefficientsAtAllThresholds, outSampleErrorsAtAllThresholds, R2OutSampleAtAllThresholds, thresholdedCoefficients, outSampleError, optimalThreshold] = computeCrossValidation(testData, testOutput, coefficients, regressionMethod, Beta0);
     
     % Step 4: Store results
-    allCoefficientsAtAllThresholds(:, :, end + 1) = coefficientsAtAllThresholds;
+    allCoefficientsAtAllThresholds = {allCoefficientsAtAllThresholds, coefficientsAtAllThresholds};
     allCoefficients = [allCoefficients, thresholdedCoefficients];
-    allErrorsAtAllThresholds(:, end + 1) = outSampleErrorsAtAllThresholds;
+    allErrorsAtAllThresholds = {allErrorsAtAllThresholds, outSampleErrorsAtAllThresholds};
+    allR2AtAllThresholds = [allR2AtAllThresholds; R2OutSampleAtAllThresholds];
     allErrors = [allErrors; outSampleError];
 end
 

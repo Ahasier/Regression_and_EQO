@@ -27,7 +27,7 @@ else
 end
 
 % Save results to disk
-saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, accuracy, meshGrid);
+saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid);
 end
 
 %% Helper functions
@@ -48,29 +48,23 @@ function results = processRealData(settings, treeData, numPermutations, phylogen
 % Generate Data
 [abundanceData, functionalOutput] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
-% Compute regressions on data
-[estimatedCoefficients, trainingSets, testSets] = computeRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
-
-% Do cross-validation over different thresholds
-[crossValidatedCoefficients, squaredError, MSE, indexOfMSE, R2OutSample, R2InSample] = computeCrossValidation(abundanceData, functionalOutput, estimatedCoefficients, trainingSets, testSets, regressionMethod, settings.Beta);
+% Compute regression and cross-validation over different thresholds on data
+[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Return results as a structure
-results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput,  'estimatedCoefficients', estimatedCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'squaredError', squaredError, 'MSE', MSE, 'indexOfMSE', indexOfMSE, 'R2OutSample', R2OutSample, 'R2InSample', R2InSample); 
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError);
 end
 
 function results = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
 % Generate Data
 [abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
-% Compute regressions on data
-[estimatedCoefficients, trainingSets, testSets] = computeRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
-
-% Do cross-validation over different thresholds
-[crossValidatedCoefficients, squaredError, MSE, indexOfMSE, R2OutSample, R2InSample] = computeCrossValidation(abundanceData, functionalOutput, estimatedCoefficients, trainingSets, testSets, regressionMethod, settings.Beta0);
+% Compute regression and cross-validation over different thresholds on data
+[allCoefficients, allErrorsAtAllThresholds, crossValidatedCoefficients, crossValidateThreshold, coefficientsStdDev, OutSampleError] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Calculate Accuracy
 accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);
 
 % Return results as a structure
-results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'estimatedCoefficients', estimatedCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'squaredError', squaredError, 'MSE', MSE, 'indexOfMSE', indexOfMSE, 'R2OutSample', R2OutSample, 'R2InSample', R2InSample, 'accuracy', accuracy);
+results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allErrorsAtAllThresholds, 'crossValidateThreshold', crossValidateThreshold, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', OutSampleError,'accuracy', accuracy);
 end

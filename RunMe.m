@@ -30,7 +30,7 @@ plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, num
 %% Helper functions
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
 % load OLSBeta0Map and EQOMap from file
-OLSBeta0Map = accessToAccMap(regressionMethod, fullIdentifier, 'Load');
+OLSBeta0Map = accessToAccMap('results/', regressionMethod, fullIdentifier, 'Load');
 OLSBeta0Map = OLSBeta0Map(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 
 EQOMap = accessToEQOMap(settings.Beta0, settings.BetaEps, 'Load');
@@ -48,7 +48,7 @@ h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, OLSBeta0Map, 'OLS', 
 saveas(gcf,['results/Heatmap',fullIdentifier,'.jpg'])
 end
 
-function resultMap = accessToAccMap(regressionMethod, fullIdentifier, saveOrLoad)
+function resultMap = accessToAccMap(resultsPath, regressionMethod, fullIdentifier, saveOrLoad)
 filename = [resultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
 if strcmp(saveOrLoad, 'Load')
     resultMap = csvread(filename);

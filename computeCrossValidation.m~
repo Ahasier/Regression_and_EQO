@@ -1,4 +1,4 @@
-function [allThresholdedCoefficients, allOutSampleErrors, bestCoefficients, bestOutSampleError, optimalThreshold] = computeCrossValidation(testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
+function [crossValidateThresholds, allThresholdedCoefficients, bestCoefficients, bestOutSampleError, optimalThreshold] = computeCrossValidation(testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
 % Handle OLS regression method
 if strcmp(regressionMethod, 'OLS')
     [crossValidateThresholds, allThresholdedCoefficients, allOutSampleErrors] = handleCrossValidationForOLS(testData, testOutput, estimatedCoefficients, beta0);
@@ -12,6 +12,7 @@ end
 bestCoefficients = allThresholdedCoefficients(:, idx);
 optimalThreshold = crossValidateThresholds(idx);
 end
+
 
 %% Helper functions
 % Perform cross-validation for Ordinary Least Squares regression

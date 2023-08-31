@@ -1,4 +1,4 @@
-function [estimatedCoefficients, trainingSets, testSets] = solveOLSRegression(abundanceData, functionalOutput, numPermutations, settings)
+function estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput, settings)
 % SOLVEOLSREGRESSION performs multiple permutations of OLS regression to estimate the 
 % association between microbial abundance data and a functional output. 
 %
@@ -14,32 +14,16 @@ function [estimatedCoefficients, trainingSets, testSets] = solveOLSRegression(ab
 %   trainingSets: indices of training samples for each permutation (training samples x numPermutations)
 %   testSets: indices of testing samples for each permutation (testing samples x numPermutations)
 
-% Get the number of samples from the input abundance data
-numberOfSamples = size(abundanceData, 1);
+% Construct the optimization problem
+[regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, [], 'OLS', settings);
 
-% Initialize variables to store intermediate results during permutations
-currentBeta = zeros(size(abundanceData, 2), numPermutations);
-trainingSets = zeros(numberOfSamples / 2, numPermutations);
-testSets = zeros(numberOfSamples / 2, numPermutations);
+% Solve the optimization problem
+opts = optimoptions('ga');
+sol = solve(regressionModel, x0, 'Options', opts);
 
-% Loop over the specified number of permutations
-for n = 1:numPermutations
-    % Divide data into training and testing sets
-    [trainingSets(:,n), testSets(:,n)] = generatePermutations(numberOfSamples);
-    
-    % Construct the optimization problem
-    [regressionModel, x0] = formulateOptimization(abundanceData(trainingSets(:,n), :), functionalOutput(trainingSets(:,n)), [], 'OLS', settings);
-    
-    % Solve the optimization problem
-    opts = optimoptions('ga');
-    sol = solve(regressionModel, x0, 'Options', opts);
-    
-    % Get estimated betas on current training sample
-    currentBeta(:, n) = sol.beta;
-    
-    % Handle extra features if needed
-    % currentBeta(:, n) = handleExtraPhylogeneticFeatures(currentBeta(:, n), abundanceData, TaraNames, Idx, Ladd);
-end
-% Updata estimated coefficients
-estimatedCoefficients = mean(currentBeta, 2);
+% Get estimated coefficients on current training samples
+estimatedCoefficients = sol.beta;
+
+% Handle extra features if needed
+% estimatedCoefficients = handleExtraPhylogeneticFeatures(estimatedCoefficients, abundanceData, TaraNames, Idx, Ladd);
 end

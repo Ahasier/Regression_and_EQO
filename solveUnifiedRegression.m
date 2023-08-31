@@ -1,4 +1,4 @@
-function [estimatedCoefficients, trainingSets, testSets] = solveUnifiedRegression(abundanceData, functionalOutput, Lambda, numPermutations, regressionMethod, settings)
+function estimatedCoefficients = solveUnifiedRegression(trainingData, trainingOutput, regressionMethod, settings)
 % SOLVEUNIFIEDREGRESSION Solves regression problems using various methods, with data splitting and averaging.
 %
 % INPUTS:
@@ -14,33 +14,21 @@ function [estimatedCoefficients, trainingSets, testSets] = solveUnifiedRegressio
 %   testSets: Matrix containing the test sets used in each permutation.
 
 % Initialize the size of the output matrix
-numberOfSamples = size(abundanceData, 1);
-estimatedCoefficients = zeros(size(abundanceData, 2), length(Lambda));
+Lambda = 0:0.1:settings.maxLambda;
+estimatedCoefficients = zeros(size(trainingData, 2), length(Lambda));
 
 for m = 1:length(Lambda)
-    currentBeta = zeros(size(abundanceData, 2), numPermutations);
-    trainingSets = zeros(numberOfSamples / 2, numPermutations);
-    testSets = zeros(numberOfSamples / 2, numPermutations);
+    % Construct the optimization problem based on the current method and data split
+    [regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, Lambda(m), regressionMethod, settings);
     
-    for n = 1:numPermutations
-        % Divide data into training and testing sets
-        [trainingSets(:,n,m), testSets(:,n,m)] = generatePermutations(numberOfSamples);
-        
-        % Construct the optimization problem based on the current method and data split
-        [regressionModel, x0] = formulateOptimization(abundanceData(trainingSets(:,n,m), :), functionalOutput(trainingSets(:,n,m)), Lambda(m), regressionMethod, settings);
-        
-        % Configure and solve the optimization problem using Genetic Algorithm (GA)
-        opts = optimoptions('ga');
-        sol = solve(regressionModel, x0, 'Options', opts);
-        
-        % Store the estimated coefficients for the current permutation
-        currentBeta(:, n) = sol.beta;
-        
-        % (Optional) Adjust coefficients if considering extra phylogenetic features
-        % currentBeta(:, n) = handleExtraPhylogeneticFeatures(currentBeta(:, n), TaraNames, Idx, Ladd);
-    end
+    % Configure and solve the optimization problem using Genetic Algorithm (GA)
+    opts = optimoptions('ga');
+    sol = solve(regressionModel, x0, 'Options', opts);
     
-    % Average the estimated coefficients over all permutations for the current Lambda
-    estimatedCoefficients(:, m) = mean(currentBeta, 2);
+    % Store the estimated coefficients for the current Lambda on current training samples
+    estimatedCoefficients(:, m) = sol.beta;
+    
+    % (Optional) Adjust coefficients if considering extra phylogenetic features
+    % estimatedCoefficients(:, m) = handleExtraPhylogeneticFeatures(estimatedCoefficients(:, m), TaraNames, Idx, Ladd);
 end
 end

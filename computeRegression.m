@@ -1,4 +1,4 @@
-function [estimatedCoefficients, trainingSets, testSets] = computeRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
+function estimatedCoefficients = computeRegression(trainingData, trainingOutput, regressionMethod, settings)
 % COMPUTEREGRESSIONS Performs regression based on input parameters.
 % INPUTS:
 %   numPermutations: Number of times to randomly permute the data for cross-validation.
@@ -11,31 +11,22 @@ function [estimatedCoefficients, trainingSets, testSets] = computeRegression(abu
 
 % Solve the regression problem based on the method provided
 if strcmp(regressionMethod, 'L0')
-    [estimatedCoefficients, trainingSets, testSets] = handleL0Regression(abundanceData, functionalOutput, numPermutations, settings);
+    estimatedCoefficients = handleL0Regression(trainingData, trainingOutput, settings);
 elseif strcmp(regressionMethod, 'OLS')
-    [estimatedCoefficients, trainingSets, testSets] = handleOLSRegression(abundanceData, functionalOutput, numPermutations, settings);
+    estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput, settings);
 else
-    [estimatedCoefficients, trainingSets, testSets] = handleUnifiedRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+    estimatedCoefficients = solveUnifiedRegression(trainingData, trainingOutput, regressionMethod, settings);
 end
 end
 
 %% Helper functions
-function [estimatedCoefficients, trainingSets, testSets] = handleL0Regression(abundanceData, functionalOutput, numPermutations, settings)
+function estimatedCoefficients = handleL0Regression(trainingData, trainingOutput, settings)
 Lambda = 1:1:settings.maxLambda;
 if isfield(settings, 'L0Option')
     if strcmp(settings.L0Option, 'MIQP')
-        [estimatedCoefficients, trainingSets, testSets] = solveL0RegressionMIQP(abundanceData, functionalOutput, Lambda, numPermutations);
+        estimatedCoefficients = solveL0RegressionMIQP(trainingData, trainingOutput, Lambda);
     elseif strcmp(settings.L0Option, 'IHT')
-        [estimatedCoefficients, trainingSets, testSets] = solveL0RegressionIterativeHardThresholding(abundanceData, functionalOutput, selectedNames, Lambda, numPermutations, settings.T0, settings.alpha, settings.max_iter);
+        estimatedCoefficients = solveL0RegressionIterativeHardThresholding(trainingData, trainingOutput, selectedNames, Lambda, settings.T0, settings.alpha, settings.max_iter);
     end
 end
-end
-
-function [estimatedCoefficients, trainingSets, testSets] = handleOLSRegression(abundanceData, functionalOutput, numPermutations, settings)
-[estimatedCoefficients, trainingSets, testSets] = solveOLSRegression(abundanceData, functionalOutput, numPermutations, settings);
-end
-
-function [estimatedCoefficients, trainingSets, testSets] = handleUnifiedRegression(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
-Lambda = 0:0.1:settings.maxLambda;
-[estimatedCoefficients, trainingSets, testSets] = solveUnifiedRegression(abundanceData, functionalOutput, Lambda, numPermutations, regressionMethod, settings, Lambda);
 end
