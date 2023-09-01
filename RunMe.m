@@ -3,7 +3,7 @@ added_path = [pwd,'/functions'];
 addpath(added_path);
 
 %% Set parameters and input arguments
-numPermutations = 10; % Average over 10 permutations
+numPermutations = 100; % Average over 10 permutations
 phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
 noiseLevel = 1; % Noise level = 1
 

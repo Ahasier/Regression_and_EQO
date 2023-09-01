@@ -63,11 +63,11 @@ function [results, resultsForDiagnostics] = processRealData(settings, treeData, 
 [abundanceData, functionalOutput] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
+[allCoefficients, allBestCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Return results as a structure
 results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', crossValidatedOutSampleError);
-resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
+resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allBestCoefficients', allBestCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
 end
 
 function [results, resultsForDiagnostics] = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
@@ -75,14 +75,14 @@ function [results, resultsForDiagnostics] = processSyntheticData(settings, treeD
 [abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
+[allCoefficients, allBestCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Calculate Accuracy
 accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);
 
 % Return results as a structure
 results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'syntheticCoefficients', syntheticCoefficients, 'crossValidatedCoefficients', crossValidatedCoefficients, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', crossValidatedOutSampleError, 'accuracy', accuracy);
-resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
+resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allBestCoefficients', allBestCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
 end
 
 function isDiagnosticMod = onDiagnosticMod(settings)
