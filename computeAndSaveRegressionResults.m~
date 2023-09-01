@@ -41,7 +41,7 @@ else
 end
 
 % Save results to disk
-saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid);
+% saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid);
 end
 
 %% Helper functions
@@ -75,7 +75,7 @@ function [results, resultsForDiagnostics] = processSyntheticData(settings, treeD
 [abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, allBestCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+[allCoefficients, allBestCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
 
 % Calculate Accuracy
 accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings);

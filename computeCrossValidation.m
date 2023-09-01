@@ -11,9 +11,9 @@ else
 end
 
 % Find the threshold that gives the minimum out-of-sample error
-[bestOutSampleError, idx] = min(allOutSampleErrors);
+[bestOutSampleError, idx] = min(allOutSampleErrors(:));
 bestCoefficients = allThresholdedCoefficients(:, idx);
-optimalThreshold = crossValidateThresholds(idx);
+optimalThreshold = findOptimalThreshold(regressionMethod, crossValidateThresholds, idx, estimatedCoefficients);
 end
 
 %% Helper functions
@@ -60,7 +60,7 @@ for l = 1:len1
     % For each threshold, compute out-of-sample error and r^2
     for k = 1:len2
         % Get the threshold at each iteration
-        threshold = crossValidateThresholds(l);
+        threshold = crossValidateThresholds(k);
         
         % Threshold coefficients and multiple by different weights, compute out-of-sample
         % error on the test data to pick an optimal one.
@@ -106,5 +106,14 @@ crossValidateThresholds = 0.1:0.1:2*beta0;
 end
 
 function weights = setWeightsRange()
-weights = 0:0.001:20;
+weights = 0.8:0.001:2;
+end
+
+function optimalThreshold = findOptimalThreshold(regressionMethod, crossValidateThresholds, idx, estimatedCoefficients)
+if strcmp(regressionMethod, 'OLS')
+    optimalThreshold = crossValidateThresholds(idx);
+else
+    lenLambda = size(estimatedCoefficients, 2);
+    optimalThreshold = crossValidateThresholds(ceil(idx/lenLambda));
+end
 end

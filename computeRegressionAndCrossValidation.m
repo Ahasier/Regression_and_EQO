@@ -1,4 +1,4 @@
-function [allCoefficients, allBestCoefficients, avgBestCoefficients, allOutSampleErrors, avgBestOutSampleError, allOutSampleR2, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, Beta0)
+function [allCoefficients, allBestCoefficients, avgBestCoefficients, allOutSampleErrors, avgBestOutSampleError, allOutSampleR2, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
 for i = 1:numPermutations
     % Step 1: Split data
     [trainingData, testData, trainingOutput, testOutput] = splitData(abundanceData, functionalOutput);
@@ -8,7 +8,7 @@ for i = 1:numPermutations
     inSampleError = computeSquaredError(trainingData, trainingOutput, coefficients); % For diagnostics
     
     % Step 3: Cross-validation on testing data
-    [crossValidateThresholds, ThresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold] = computeCrossValidation(testData, testOutput, coefficients, regressionMethod, Beta0);
+    [crossValidateThresholds, ThresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold] = computeCrossValidation(testData, testOutput, coefficients, regressionMethod, settings.Beta0);
     
     % Step 4: Store results
     if i == 1 % If output variables are not exist, initialize them
@@ -51,9 +51,9 @@ if strcmp(regressionMethod, 'OLS')
     allOptimalThresholds(idx) = optimalThreshold;
 else
     allCoefficients(:, :, :, idx) = coefficients;
-    allBestCoefficients(:, :, idx) = bestCoefficients;
+    allBestCoefficients(:, idx) = bestCoefficients;
     allOutSampleErrors(:, :, idx) = outSampleErrors;
-    allBestOutSampleErrors(:, idx) = bestOutSampleError;
+    allBestOutSampleErrors(idx) = bestOutSampleError;
     allOutSampleR2(:, :, idx) = R2OutSamples;
     allOptimalThresholds(:, idx) = optimalThreshold;
 end
@@ -71,9 +71,9 @@ if strcmp(regressionMethod, 'OLS')
 else
     numLambda = size(coefficients, 2);
     allCoefficients = zeros(size(abundanceData,2), numLambda, numThresholds, numPermutations);
-    allBestCoefficients = zeros(size(abundanceData,2), numLambda, numPermutations);
+    allBestCoefficients = zeros(size(abundanceData,2), numPermutations);
     allOutSampleErrors = zeros(numLambda, numThresholds, numPermutations);
-    allBestOutSampleErrors = zeros(numLambda,  numPermutations);
+    allBestOutSampleErrors = zeros(1,  numPermutations);
     allOutSampleR2 = zeros(numLambda, numThresholds,numPermutations);
     allOptimalThresholds = zeros(numLambda,  numPermutations);
 end

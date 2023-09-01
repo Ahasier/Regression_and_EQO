@@ -8,19 +8,19 @@ phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
 noiseLevel = 1; % Noise level = 1
 
 numberOfTaxaInAGroup_list = [10 30 50]; % Set the number of taxa within a syntetic functional group
-numSamples_list = [40 80 120]; % Set the number of samples
+numSamples_list = [20 60 100 140]; % Set the number of samples
 
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'LASSO';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 'cv','RealAbd','On','DiagnosticMod', 'On', 'maxLambda', 10};
+regressionMethod = 'OLS';
+varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 'cv','RealAbd','On','DiagnosticMod', 'On'};
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
 
 %% Run computeAndSaveRegressionResults to get results files
 for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
     for numSamples = numSamples_list
-        results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, varargin{:});
+        computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, varargin{:})
     end
 end
 
