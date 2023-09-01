@@ -2,7 +2,7 @@ function [taxaAbundance, functionalOutput, syntheticCoefficients, selectedLeaves
 % GENERATESYNTHETICDATA simulates microbial abundance and functional output data based on 
 % the provided parameters and settings.
 %
-% Inputs:
+% INPUTS:
 %   treeData: data related to the phylogenetic tree
 %   phylogenyDependency: parameter to model dependency in the data based on phylogeny
 %   numberOfTaxaInAGroup: the number of taxa to be grouped together in synthetic data
@@ -10,7 +10,7 @@ function [taxaAbundance, functionalOutput, syntheticCoefficients, selectedLeaves
 %   numberOfSamples: the number of samples to generate for the synthetic data
 %   settings: a struct containing various settings for data generation
 %
-% Outputs:
+% OUTPUTS:
 %   taxaAbundance: matrix containing taxa abundance data (samples x taxa)
 %   functionalOutput: vector containing the functional outputs (samples x 1)
 %   syntheticCoefficients: vector containing the true coefficients used to generate synthetic data (taxa x 1)

@@ -2,27 +2,17 @@ function saveResults(results, resultsPath, betaResultsPath, regressionMethod, fu
 % SAVERESULTS Save regression results to CSV and MAT files.
 %
 % INPUTS:
-%   abundanceData: Matrix of abundance data.
-%   functionalOuput: Values of functional outputs from different samples.
-%   syntheticCoefficients: Synthetic coefficients generated.
+%   results: The results of the regression analysis.
 %   resultsPath: Path to save the .CSV accuracy results.
-%   betaResultsPath: Path to save the .MAT results.
-%   regressionMethod: Regression method used.
-%   fullIdentifier: A string indicates indentific information of the
-%   settings.
-%   numberOfTaxaInAGroup: Number of taxa selected in a functional group
-%   when generating synthetic data.
-%   numSamples: Number of total samples in the regression model.
-%   estimatedCoefficients: Estimated coefficients recovered by regressions.
-%   crossValidatedCoefficients: Optimal estimated coefficients selected
-%   through cross-validation.
-%   squaredError: Squared error of the regression model out of samples.
-%   R2OutSample: R^2 correlation coefficients out of samples.
-%   R2inSample: R^2 correlation coefficients in samples.
-%   accuracy: Estimation accuracy of the regression model.
-% 
+%   betaResultsPath: Path to save the .MAT results related to regression coefficients.
+%   regressionMethod: Regression method used for the analysis.
+%   fullIdentifier: A string indicating specific identification information of the settings.
+%   numberOfTaxaInAGroup: Number of taxa selected in a functional group (relevant for synthetic data).
+%   numSamples: Number of total samples used in the regression model.
+%   meshGrid: Grid used for visualization or further analysis (if applicable).
+%
 % OUTPUTS:
-%   No direct output; instead, it writes CSV and MAT files to disk.
+%   Results are saved to files; no direct outputs from the function.
 
 % Construct the filename where accuracy results will be saved
 filename = [resultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];

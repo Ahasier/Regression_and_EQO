@@ -1,7 +1,7 @@
 function [taxaAbundance, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings)
 % GENERATEDATA loads real data or generates synthetic data based on the provided parameters for regression analysis.
 %
-% Inputs:
+% INPUTS:
 %   treeData: data related to the phylogenetic tree
 %   phylogenyDependency: parameter to model dependency in the data based on phylogeny
 %   numberOfTaxaInAGroup: the number of taxa to be grouped together in synthetic data
@@ -9,7 +9,7 @@ function [taxaAbundance, functionalOutput, syntheticCoefficients] = generateData
 %   numberOfSamples: the number of samples to generate for the synthetic data
 %   settings: a struct containing various settings for data generation/loading
 %
-% Outputs:
+% OUTPUTS:
 %   taxaAbundance: matrix containing taxa abundance data (samples x taxa)
 %   functionalOutput: vector containing the functional outputs (samples x 1)
 %   syntheticCoefficients: vector containing the true coefficients used to generate synthetic data (taxa x 1), empty for real data

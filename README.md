@@ -9,36 +9,41 @@ This MATLAB project uses regression methods to recover functional groups (coeffi
 ```
 Regression_and_EQO/
 │
-├── computeCrossValidation.m            # Script for cross-validation
-├── generateData.m                      # Script for data generation
-├── saveResults.m                       # Script for saving results
-├── computeAndSaveRegressionResults.m   # Script for computing and saving regression results
-├── calculateAccuracy.m                 # Script for calculating accuracy metrics
-├── loadRealData.m                      # Script for loading real dataset
-├── solveUnifiedRegression.m            # Script for unified regression model
-├── generateSyntheticData.m             # Script for generating synthetic data
-├── formulateOptimization.m             # Script for formulating optimization problems
-├── RunMe.m                             # Main script to run the entire analysis
-├── solveOLSRegression.m                # Script for Ordinary Least Squares (OLS) regression
-├── computeRegression.m                 # Script for computing regression models
+├── computeCrossValidation.m                      # Script for cross-validation
+├── computeRegression.m                           # Script for regression models
+├── computeRegressionAndCrossValidation.m         # Unified script for regression and cross-validation
+├── generateData.m                                # Script for data generation
+├── saveResults.m                                 # Script for saving results
+├── computeAndSaveRegressionResults.m             # Script for computing and saving regression results
+├── calculateAccuracy.m                           # Script for calculating accuracy metrics
+├── loadRealData.m                                # Script for loading real dataset
+├── solveUnifiedRegression.m                      # Script for unified regression model
+├── generateSyntheticData.m                       # Script for generating synthetic data
+├── formulateOptimization.m                       # Script for formulating optimization problems
+├── RunMe.m                                       # Main script to run the entire analysis
+├── solveOLSRegression.m                          # Script for Ordinary Least Squares (OLS) regression
 │
-├── Meta_Tara.csv                       # Real dataset in CSV format
-├── tree100taxa.mat                     # MATLAB data file related to synthetic phylogenetic tree
-├── tree100taxaReal.mat                 # MATLAB data file  related to real phylogenetic tree
+├── Meta_Tara.csv                                 # Real dataset in CSV format
+├── tree100taxa.mat                               # MATLAB data file for synthetic phylogenetic tree
+├── tree100taxaReal.mat                           # MATLAB data file for real phylogenetic tree
 │
-├── results/                            # Directory for storing result files
-│   └── Betas/                          # Subdirectory for storing regression coefficient files
-└── functions/                          # Directory for utility and helper functions
-    ├── handleExtraPhylogeneticFeatures.m
-    ├── generatePermutations.m
-    ├── indicesOfAccuracyMatrixElement.m
-    ├── loadOrInitializeAccuracyResultsFile.m
+├── results/                                      # Directory for storing result files
+│   ├── Betas/                                    # Subdirectory for regression coefficient files
+│   └── temporaryStorage/                         # Subdirectory for temporary storage
+│       └── Betas/                                # Subdirectory for temporary regression coefficient files
+│
+└── functions/                                    # Directory for utility and helper functions
+    ├── computeRSquared.m
+    ├── computeSquaredError.m
     ├── getCompleteAccuracyFilePath.m
-    ├── usingRealData.m
-    ├── setOptionsAndNames.m
-    ├── plotMap.m
+    ├── handleExtraPhylogeneticFeatures.m
+    ├── loadOrInitializeAccuracyResultsFile.m
     ├── plotGapMap.m
+    ├── plotMap.m
     ├── plotstyle.m
+    ├── setOptionsAndNames.m
+    ├── usingRealData.m
+    └── visualizeResults.m
 ```
 
 ## How to Run the Project

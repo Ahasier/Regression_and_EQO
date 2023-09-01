@@ -1,4 +1,16 @@
 function [crossValidateThresholds, allThresholdedCoefficients, bestCoefficients, allOutSampleErrors, bestOutSampleError, allR2OutSample, optimalThreshold] = computeCrossValidation(testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
+% COMPUTECROSSVALIDATION performs cross-validation for the provided test data, estimated regression coefficients, and specified regression method.
+% 
+% INPUTS:
+%   testData: Matrix containing the test data.
+%   testOutput: Vector containing the corresponding test output.
+%   estimatedCoefficients: Vector of regression coefficients estimated from the training phase.
+%   regressionMethod: String specifying the regression method ('OLS', etc.).
+%   beta0: Initial value for setting cross-validation thresholds.
+% 
+% OUTPUTS:
+%   Various metrics related to cross-validation, including thresholded coefficients, errors, R-squared values, and the optimal threshold.
+
 % Set threshold values for cross validation to go over
 crossValidateThresholds = setCrossValidationThreshold(beta0);
 
@@ -52,7 +64,7 @@ allR2OutSample = zeros(len1, len2);
 allThresholdedCoefficients = zeros(size(estimatedCoefficients, 1), len1, len2);
 weights = setWeightsRange();
 
-% Iterate through all regresssion (lambda) parameters
+% Loop through all regresssion (lambda) parameters
 for l = 1:len1
     % Get estimated coefficients at the current regresssion (lambda) parameters
     currentCoefficients = estimatedCoefficients(:, l);
@@ -84,7 +96,7 @@ thresholdedCoefficientsOverDifferentWeights = zeros(numTaxa, lenWeights);
 % Compute the binary vector of whether coefficients exceed threshold
 binaryCoefficients = estimatedCoefficients >= threshold;
 
-% Iterate over different weights, threshold coefficients and compute out-of-sample
+% Loop over different weights, threshold coefficients and compute out-of-sample
 % errors on the test data
 for w = 1:lenWeights
     weight = weights(w);

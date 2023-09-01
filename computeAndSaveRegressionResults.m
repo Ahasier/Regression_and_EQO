@@ -2,14 +2,16 @@ function results = computeAndSaveRegressionResults(numPermutations, phylogenyDep
 % COMPUTEANDSAVEREGRESSIONRESULTS Computes and saves the regression results.
 % 
 % INPUTS:
-%   numPermutations: Number of random permutations.
-%   phylogenyDependency: 0 if beta's are independent of phylogeny.
-%   noiseLevel: Noise level for regression.
-%   numGroups: Number of taxa in a functional group.
-%   numSamples: Number of samples in the trainning data.
-%   regressionMethod: Regression method in use.
-%   varargin: Option pairs. i.e.
-%   'BetaEps',0.5,'Beta0',1,'Threshold','cv','RealAbd','On'.
+%   numPermutations: Number of random permutations for the analysis.
+%   phylogenyDependency: Dependency parameter related to phylogeny (0 if beta's are independent of phylogeny).
+%   noiseLevel: Noise level to consider for the regression.
+%   numberOfTaxaInAGroup: Number of taxa grouped together in a functional group.
+%   numSamples: Number of samples in the training data.
+%   regressionMethod: Chosen regression method (e.g., 'LASSO').
+%   varargin: Option pairs (e.g., 'BetaEps',0.5,'Beta0',1,'Threshold','cv','RealAbd','On').
+%
+% OUTPUTS:
+%   results: Regression results based on the specified parameters.
 %
 % Example usage: computeAndSaveRegressionResults(10, 0, 1, 5, 20, 'LASSO', 'maxLambda', 10, 'Threshold', 'cv');
 

@@ -1,17 +1,14 @@
 function estimatedCoefficients = solveUnifiedRegression(trainingData, trainingOutput, regressionMethod, settings)
-% SOLVEUNIFIEDREGRESSION Solves regression problems using various methods, with data splitting and averaging.
+% SOLVEUNIFIEDREGRESSION solves regression problems using various methods
 %
 % INPUTS:
-%   abundanceData: Matrix representing the abundance data.
-%   functionalOutput: Vector representing the functional output of the system.
-%   Lambda: Vector of regularization parameters.
-%   numPermutations: Number of times to randomly permute the data for cross-validation.
-%   regressionMethod: String specifying the regression method to be used ('LASSO', 'Ridge', etc.).
-%   settings: A structure containing additional parameters and settings.
+%   trainingData: Matrix representing the training data.
+%   trainingOutput: Vector representing the training output.
+%   regressionMethod: String specifying the regression method (e.g., 'LASSO', 'Ridge').
+%   settings: A structure containing additional parameters and settings, including a range for the regularization parameter Lambda.
 %
-% OUTPUTS:
-%   estimatedCoefficients: Matrix of estimated regression coefficients.
-%   testSets: Matrix containing the test sets used in each permutation.
+% OUTPUT:
+%   estimatedCoefficients: Matrix of estimated regression coefficients for each value of Lambda.
 
 % Initialize the size of the output matrix
 Lambda = 0:0.1:settings.maxLambda;

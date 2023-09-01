@@ -1,6 +1,17 @@
 function [regressionModel, x0] = formulateOptimization(abundanceSubset, functionalOutputSubset, lambda, regressionMethod, settings)
 % FORMULATEOPTIMIZATION formulates an optimization problem based on the specified regression
 % method and returns a regression model (optimproblem object) and initial point x0
+% 
+% INPUTS:
+%   abundanceSubset: Subset of the abundance data.
+%   functionalOutputSubset: Subset of the functional output data.
+%   lambda: Regularization parameter for the regression.
+%   regressionMethod: String specifying the regression method (e.g., 'LASSO', 'Ridge', 'L0').
+%   settings: A structure containing additional parameters and settings.
+%
+% OUTPUTS:
+%   regressionModel: An optimization problem object suitable for the specified regression method.
+%   x0: Initial point for the optimization problem.
 
 % Select the appropriate regression model based on the specified method
 switch regressionMethod

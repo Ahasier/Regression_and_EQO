@@ -1,10 +1,12 @@
 function accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoefficients, settings)
-% caculateAccuracy Computes the accuracy of the model based on cross-validated coefficients
+% CALCULATEACCURACY Computes the accuracy of the model based on cross-validated coefficients
 % and synthetic coefficients (true values).
+% 
 % INPUT:
 %   crossValidatedCoefficients: The coefficients estimated by the cross-validation procedure
 %   syntheticCoefficients: The true coefficients (or synthetic ones for simulation)
 %   options: A struct that may contain a custom threshold value
+% 
 % OUTPUT:
 %   accuracy: A scalar that indicates the accuracy of the model
 

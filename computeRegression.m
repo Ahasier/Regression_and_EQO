@@ -1,13 +1,13 @@
 function estimatedCoefficients = computeRegression(trainingData, trainingOutput, regressionMethod, settings)
 % COMPUTEREGRESSIONS Performs regression based on input parameters.
 % INPUTS:
-%   numPermutations: Number of times to randomly permute the data for cross-validation.
-%   regressionMethod: String specifying the regression method to be used ('LASSO', 'Ridge', etc.).
-%   settings: A structure containing additional parameters and settings.
+%   trainingData: Matrix containing the training data.
+%   trainingOutput: Vector containing the corresponding training output.
+%   regressionMethod: String specifying the regression method ('L0', 'OLS', etc.).
+%   settings: A structure with additional parameters and settings.
 % 
-% OUTPUTS:
-%   estimatedCoefficients: Matrix of estimated regression coefficients.
-%   testSets: Matrix containing the test sets used in each permutation.
+% OUTPUT:
+%   estimatedCoefficients: Vector of estimated regression coefficients based on the chosen regression method.
 
 % Solve the regression problem based on the method provided
 if strcmp(regressionMethod, 'L0')

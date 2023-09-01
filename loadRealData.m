@@ -2,9 +2,12 @@ function [taxaAbundance, observableOutput] = loadRealData(numberOfSamples)
 % LOADREALDATA loads real microbial abundance data and extracts relevant observable
 % outputs (e.g., nitrate levels) from the metadata.
 %
-% Outputs:
-%   taxaAbundance: matrix containing taxa abundance data (samples x taxa)
-%   observableOutput: vector containing the observed functional outputs (samples x 1)
+% INPUT:
+%   numberOfSamples: Number of samples for which data needs to be loaded.
+%
+% OUTPUTS:
+%   taxaAbundance: Matrix containing taxa abundance data (samples x taxa).
+%   observableOutput: Vector containing observed functional outputs (samples x 1).
 
 % Paths and constants
 pathToResults = 'results/NX/';
