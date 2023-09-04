@@ -81,13 +81,11 @@ end
 
 % Generates synthetic microbial abundance data using either a model to mimic real data or a normal distribution.
 function taxaAbundance = generateAbundanceData(treeData, numberOfSamples, settings)
-[xm, a] = setMimicRealAbundanceDistributionParameters();
-
-if generateMimicRealAbundance(settings)
-    Nseed = rand(treeData.NumLeaves, numberOfSamples)';
-    taxaAbundance = (- xm * (-1 + (1 - Nseed).^(1/a))) ./ ((1 - Nseed).^(1/a));
-    taxaAbundance = floor(taxaAbundance);
+% If generating mimic-real abundance data, generate them from the specific long-tail (Pareto) distribution
+if isGeneratingMimicRealAbundance(settings)
+    taxaAbundance = generateMimicRealAbundance(realData, treeData.NumLeaves, numberOfSamples);
 else
+    % Otherwise, generate abundance data from a random Guassian.
     taxaAbundance = normrnd(10, 10, treeData.NumLeaves, numberOfSamples)';
 end
 end
@@ -98,12 +96,80 @@ functionalOutput = taxaAbundance * syntheticCoefficients + normrnd(0, noiseLevel
 end
 
 % Checks the settings to determine whether to mimic real abundance data or generate synthetic abundance data using a normal distribution.
-function isRealAbundance = generateMimicRealAbundance(settings)
+function isRealAbundance = isGeneratingMimicRealAbundance(settings)
 isRealAbundance = isfield(settings, 'RealAbd') && strcmp(settings.RealAbd, 'On');
 end
 
-% Set parameter values for the distribution of mimic-real abundance matrix.
-function [xm, a] = setMimicRealAbundanceDistributionParameters();
+% % Generate mimic-real abundance data from long-tail distribution
+% function taxaAbundance = generateMimicRealAbundance(NumLeaves, numberOfSamples)
+% % Set parameter values for the distribution of mimic-real taxa abundance
+% [xm, a] = setMimicRealAbundanceDistributionParameters();
+% 
+% % 1. Set the row sums of abundance matrix following a long-tail distribution
+% Nseed1 = rand(numberOfSamples)';
+% rowSums = (- xm.dist1 * (-1 + (1 - Nseed1).^(1/a.dist1))) ./ ((1 - Nseed1).^(1/a.dist1));
+% 
+% % 2. Set the values of matrix elements from a long-tail distribution
+% % Randomly generate taxa abundance data from the determined distribution
+% Nseed2 = rand(NumLeaves, numberOfSamples)';
+% taxaAbundance = (- xm.dist2 * (-1 + (1 - Nseed2).^(1/a.dist2))) ./ ((1 - Nseed2).^(1/a.dist2));
+% 
+% % 3. Normalize the matrix to the determined row sums
+% taxaAbundance = taxaAbundance.*rowSums./sum(taxaAbundance, 2);
+% 
+% % Taxa abundance takes integer values
+% taxaAbundance = floor(taxaAbundance);
+% end
+
+% Generate mimic-real abundance data from long-tail distribution
+function taxaAbundance = generateMimicRealAbundance(realData, numTaxa, numSamples)
+% Extract row and column sums from real data
+realRowSums = sum(realData, 2);
+realColSums = sum(realData, 1);
+
+% Simulate row and column sums using empirical distributions
+syntheticRowSums = datasample(realRowSums, size(realRowSums, 1));
+syntheticColSums = datasample(realColSums, size(realColSums, 2));
+
+% Initialize synthetic matrix with Pareto-distributed values
+[xm, alpha] = setMimicRealAbundanceDistributionParameters();
+Nseed2 = rand(NumLeaves, numSamples)';
+taxaAbundance = (- xm * (-1 + (1 - Nseed2).^(1/alpha))) ./ ((1 - Nseed2).^(1/alpha));
+% taxaAbundance = (rand(size(realData)).^(-1/alpha)) - 1;
+
+% Bi-normalize synthetic matrix to match row and column sums
+for iter = 1:1000
+    % Row normalization
+    taxaAbundance = bsxfun(@rdivide, taxaAbundance, sum(taxaAbundance, 2)) .* syntheticRowSums;
+    
+    % Column normalization
+    taxaAbundance = bsxfun(@rdivide, taxaAbundance, sum(taxaAbundance, 1)) .* syntheticColSums;
+    
+    % Convergence check can be added here if required
+end
+
+% Introduce sparsity based on real data sparsity
+sparsityRate = sum(sum(realData == 0)) / numel(realData);
+mask = rand(size(realData)) < sparsityRate;
+taxaAbundance(mask) = 0;
+
+% Subsample the mimic-real abundance matrix to dimensions numTaxa x numSamples
+[taxaAbundance, ~, ~] = subsampleMatrix(taxaAbundance, numTaxa, numSamples);
+end
+
+function [subsampledMatrix, rowIndices, colIndices] = subsampleMatrix(syntheticMatrix, NumTaxa, NumSamples)
+% Randomly select NumTaxa rows and NumSamples columns without replacement
+rowIndices = datasample(1:size(syntheticMatrix, 1), NumTaxa, 'Replace', false);
+colIndices = datasample(1:size(syntheticMatrix, 2), NumSamples, 'Replace', false);
+
+% Subset the matrix
+subsampledMatrix = syntheticMatrix(rowIndices, colIndices);
+end
+
+
+% Set parameter values for the distribution of mimic-real abundance matrix elements.
+function [xm, alpha] = setMimicRealAbundanceDistributionParameters()
+% Parameters for the first long-tail distribution (row sums)
 xm = 87.71;
-a = 4.254;
+alpha = 4.254;
 end

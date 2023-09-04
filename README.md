@@ -2,7 +2,7 @@
 # README for Regression_and_EQO
 
 ## Project Description
-This MATLAB project uses regression methods to recover functional groups (coefficient == 1 if some taxa is included in that functional group, and coefficient == 0 if not) from mock or real datasets. The data includes an abundance table of different taxa in different samples, and the specific functional output in different samples. it recovers the coefficients relating to whether-or-not a taxa belongs to that functional group and evaluates the prediction accuracy of various regression models under different conditions.
+This MATLAB project uses regression methods to recover microbial functional groups (coefficient == 1 if some taxa is included in that functional group, and coefficient == 0 if not) from mock or real datasets. The data includes an abundance table of different taxa in different samples, and the specific functional output in different samples. it recovers the coefficients relating to whether-or-not a taxa belongs to that functional group and evaluates the prediction accuracy of various regression models under different conditions.
 
 ## Directory Structure and Main Files
 
