@@ -16,28 +16,28 @@ function [regressionModel, x0] = formulateOptimization(abundanceSubset, function
 % Select the appropriate regression model based on the specified method
 switch regressionMethod
     case 'LASSO'
-        [regressionModel, x0] = lassoObjective(abundanceSubset, functionalOutputSubset, lambda);
+        [regressionModel, x0] = lassoObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
     case 'Ridge'
-        [regressionModel, x0] = ridgeObjective(abundanceSubset, functionalOutputSubset, lambda);
+        [regressionModel, x0] = ridgeObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
     case 'L0'
         [regressionModel, x0] = l0Objective(abundanceSubset, functionalOutputSubset, lambda, settings.RegPower);
     case 'Nonlinear'
-        [regressionModel, x0] = nonlinearDesignedObjective(abundanceSubset, functionalOutputSubset, lambda);
+        [regressionModel, x0] = nonlinearDesignedObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
     case 'Combined'
-        [regressionModel, x0] = combinedObjective(abundanceSubset, functionalOutputSubset, lambda);
+        [regressionModel, x0] = combinedObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
     case 'Binary'
         [regressionModel, x0] = binaryObjective(abundanceSubset, functionalOutputSubset);
     case 'OLS'
-        [regressionModel, x0] = OLSObjective(abundanceSubset, functionalOutputSubset);
+        [regressionModel, x0] = OLSObjective(abundanceSubset, functionalOutputSubset, settings.requirePositivity);
 end
 end
 
 %% Helper functions
 % LASSO Regression Objective Function
 % Formulate LASSO regression as an optimization problem
-function [prob, x0] = lassoObjective(trainingData, functionalOutput, lambda)
+function [prob, x0] = lassoObjective(trainingData, functionalOutput, lambda, requirePositivity)
 % Define optimization variable for LASSO coefficients
-beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
+beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
 residual = trainingData * beta - functionalOutput;
@@ -54,9 +54,9 @@ end
 
 % Ridge Regression Objective Function
 % Formulate Ridge regression as an optimization problem
-function [prob, x0] = ridgeObjective(trainingData, functionalOutput, lambda)
+function [prob, x0] = ridgeObjective(trainingData, functionalOutput, lambda, requirePositivity)
 % Define optimization variable for Ridge coefficients
-beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
+beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
 residual = trainingData * beta - functionalOutput;
@@ -74,7 +74,6 @@ end
 % L0 Regression Objective Function
 % Formulate L0 norm regression as an optimization problem
 function [prob, x0] = l0Objective(trainingData, functionalOutput, lambda, regPower)
-
 % Define optimization variable for L0 regression coefficients
 beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
 
@@ -112,9 +111,9 @@ end
 
 % Nonlinear Designed Regression Objective Function
 % Formulate nonlinear designed regression as an optimization problem
-function [prob, x0] = nonlinearDesignedObjective(trainingData, functionalOutput, lambda)
+function [prob, x0] = nonlinearDesignedObjective(trainingData, functionalOutput, lambda, requirePositivity)
 % Define optimization variable for nonlinear designed regression coefficients
-beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
+beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
 residual = trainingData * beta - functionalOutput;
@@ -131,9 +130,9 @@ end
 
 % Combined Regression Objective Function
 % Formulate combined regression as an optimization problem
-function [prob, x0] = combinedObjective(trainningData, functionalOutput, lambda)
+function [prob, x0] = combinedObjective(trainningData, functionalOutput, lambda, requirePositivity)
 % Define optimization variable for L-combined regression coefficients
-beta = optimvar('beta', size(trainningData, 2), 'LowerBound', 0);
+beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
 residual = trainningData * beta - functionalOutput;
@@ -150,9 +149,9 @@ end
 
 % Ordinary Least Squares (OLS) Regression Objective Function
 % Formulate OLS regression as an optimization problem
-function [prob, x0] = OLSObjective(trainingData, functionalOutput)
+function [prob, x0] = OLSObjective(trainingData, functionalOutput, requirePositivity)
 % Define optimization variable for OLS coefficients
-beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
+beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
 residual = trainingData * beta - functionalOutput;
@@ -165,6 +164,14 @@ prob = optimproblem('Objective', obj);
 
 % Define the initial point for the optimization algorithm
 x0.beta = zeros(size(trainingData, 2), 1)';
+end
+
+function beta = defineOptimizationVariable(requirePositivity, trainingData)
+if isfield(settings, 'requirePositivity') && strcmp(requirePositivity, 'On')
+    beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
+else
+    beta = optimvar('beta', size(trainingData, 2));
+end
 end
 
 % Define the nonlinear designed penalty term for regression coefficients

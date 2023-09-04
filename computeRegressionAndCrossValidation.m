@@ -1,4 +1,4 @@
-function [allCoefficients, allBestCoefficients, avgBestCoefficients, allOutSampleErrors, avgBestOutSampleError, allOutSampleR2, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
+function [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
 % COMPUTEREGRESSIONANDCROSSVALIDATION integrates the regression and cross-validation processes.
 % 
 % INPUTS:
@@ -41,6 +41,9 @@ end
 avgBestCoefficients = median(allBestCoefficients, 2);
 coefficientsStdDev = std(allBestCoefficients, 0, 2);
 avgBestOutSampleError = mean(allBestOutSampleErrors);
+
+% Store results as a structure
+resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allBestCoefficients', allBestCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrors, 'allOutSampleR2AtAllThresholds', allOutSampleR2, 'allOptimalThresholds', allOptimalThresholds, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', avgBestOutSampleError);
 end
 
 %% Helper functions

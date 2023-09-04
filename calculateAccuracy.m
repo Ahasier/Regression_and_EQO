@@ -12,7 +12,11 @@ function accuracy = calculateAccuracy(crossValidatedCoefficients, syntheticCoeff
 
 % Check if a custom threshold is specified in options
 if isfield(settings, 'Threshold') && ~strcmp(settings.Threshold, 'cv')
-    accuracy = MCC(crossValidatedCoefficients >= settings.Threshold, syntheticCoefficients >= settings.Threshold);
+    if isnan(settings.Threshold)
+        accuracy = pearsonCorrelationCoefficients(crossValidatedCoefficients, syntheticCoefficients);
+    else
+        accuracy = MCC(crossValidatedCoefficients >= settings.Threshold, syntheticCoefficients >= settings.Threshold);
+    end
 else
     % If no custom threshold, use a default value of 1e-4
     accuracy = MCC(crossValidatedCoefficients >= 1e-4, syntheticCoefficients >= 1e-4);
@@ -45,4 +49,8 @@ if denominator == 0
 else
     phi = (n11 * n00 - n10 * n01) / denominator;
 end
+end
+
+function r = pearsonCorrelationCoefficients(B, beta)
+r = sum((B - mean(B)).*(beta - mean(beta)))/(sqrt(sum((B - mean(B)).^2))*sqrt(sum((beta - mean(beta)).^2)));
 end
