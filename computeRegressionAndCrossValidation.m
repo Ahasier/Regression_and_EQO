@@ -11,6 +11,12 @@ function [allCoefficients, allBestCoefficients, avgBestCoefficients, allOutSampl
 % OUTPUTS:
 %   Various metrics related to the integrated regression and cross-validation process, including coefficients, out-of-sample errors, R-squared values, and optimal thresholds.
 
+% Set threshold values for cross validation to go over
+crossValidateThresholds = setCrossValidationThreshold(beta0);
+
+% Initialize output results variables
+[allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = initializeCrossValidationResults(abundanceData, regressionMethod, numPermutations, crossValidateThresholds, settings);
+
 % Loop over various permutations
 for i = 1:numPermutations
     % Step 1: Split data
@@ -21,13 +27,14 @@ for i = 1:numPermutations
     inSampleError = computeSquaredError(trainingData, trainingOutput, coefficients); % For diagnostics
     
     % Step 3: Cross-validation on testing data
-    [crossValidateThresholds, ThresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold] = computeCrossValidation(testData, testOutput, coefficients, regressionMethod, settings.Beta0);
+    [thresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold] = computeCrossValidation(crossValidateThresholds, testData, testOutput, coefficients, regressionMethod, settings.Beta0);
     
     % Step 4: Store results
-    if i == 1 % If output variables are not exist, initialize them
-        [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = initializeCrossValidationResults(abundanceData, regressionMethod, ThresholdedCoefficients, numPermutations, crossValidateThresholds);
+    if strcmp(regressionMethod,'OLS')
+        [allCoefficients(:, :, idx), allBestCoefficients(:, idx), allOutSampleErrors(:,idx), allBestOutSampleErrors(idx), allOutSampleR2(:,idx), allOptimalThresholds(idx)] = storeCrossValidationResults(thresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold);
+    else
+        [allCoefficients(:, :, :, idx), allBestCoefficients(:, idx), allOutSampleErrors(:, :, idx), allBestOutSampleErrors(idx), allOutSampleR2(:, :, idx), allOptimalThresholds(:, idx)] = storeCrossValidationResults(thresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold);
     end
-    [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = storeCrossValidationResultsOverPermutations(i, regressionMethod, ThresholdedCoefficients, bestThresholedCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold, allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds);
 end
 
 % Aggregate results
@@ -54,25 +61,16 @@ trainingOutput = functionalOutput(trainingIdx);
 testOutput = functionalOutput(testIdx);
 end
 
-function [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = storeCrossValidationResultsOverPermutations(idx, regressionMethod, coefficients, bestCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold, allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds)
-if strcmp(regressionMethod, 'OLS')
-    allCoefficients(:, :, idx) = coefficients;
-    allBestCoefficients(:, idx) = bestCoefficients;
-    allOutSampleErrors(:,idx) = outSampleErrors;
-    allBestOutSampleErrors(idx) = bestOutSampleError;
-    allOutSampleR2(:,idx) = R2OutSamples;
-    allOptimalThresholds(idx) = optimalThreshold;
-else
-    allCoefficients(:, :, :, idx) = coefficients;
-    allBestCoefficients(:, idx) = bestCoefficients;
-    allOutSampleErrors(:, :, idx) = outSampleErrors;
-    allBestOutSampleErrors(idx) = bestOutSampleError;
-    allOutSampleR2(:, :, idx) = R2OutSamples;
-    allOptimalThresholds(:, idx) = optimalThreshold;
-end
+function [thisCoefficients, thisBestCoefficients, thisOutSampleErrors, thisBestOutSampleErrors, thisOutSampleR2, thisOptimalThresholds] = storeCrossValidationResults(coefficients, bestCoefficients, outSampleErrors, bestOutSampleError, R2OutSamples, optimalThreshold)
+thisCoefficients = coefficients;
+thisBestCoefficients = bestCoefficients;
+thisOutSampleErrors = outSampleErrors;
+thisBestOutSampleErrors = bestOutSampleError;
+thisOutSampleR2 = R2OutSamples;
+thisOptimalThresholds = optimalThreshold;
 end
 
-function [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = initializeCrossValidationResults(abundanceData, regressionMethod, coefficients, numPermutations, crossValidateThresholds)
+function [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = initializeCrossValidationResults(abundanceData, regressionMethod, numPermutations, crossValidateThresholds, settings)
 numThresholds = length(crossValidateThresholds);
 if strcmp(regressionMethod, 'OLS')
     allCoefficients = zeros(size(abundanceData,2), numThresholds, numPermutations);
@@ -82,7 +80,8 @@ if strcmp(regressionMethod, 'OLS')
     allOutSampleR2 = zeros(numThresholds,numPermutations);
     allOptimalThresholds = zeros(1, numPermutations);
 else
-    numLambda = size(coefficients, 2);
+    Lambda = setLambdaRange(settings.maxLambda);
+    numLambda = length(Lambda);
     allCoefficients = zeros(size(abundanceData,2), numLambda, numThresholds, numPermutations);
     allBestCoefficients = zeros(size(abundanceData,2), numPermutations);
     allOutSampleErrors = zeros(numLambda, numThresholds, numPermutations);
@@ -90,4 +89,8 @@ else
     allOutSampleR2 = zeros(numLambda, numThresholds,numPermutations);
     allOptimalThresholds = zeros(numLambda,  numPermutations);
 end
+end
+
+function crossValidateThresholds = setCrossValidationThreshold(beta0)
+crossValidateThresholds = 0.1:0.1:2*beta0;
 end

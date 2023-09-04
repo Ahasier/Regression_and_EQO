@@ -1,4 +1,4 @@
-function [crossValidateThresholds, allThresholdedCoefficients, bestCoefficients, allOutSampleErrors, bestOutSampleError, allR2OutSample, optimalThreshold] = computeCrossValidation(testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
+function [allThresholdedCoefficients, bestCoefficients, allOutSampleErrors, bestOutSampleError, allR2OutSample, optimalThreshold] = computeCrossValidation(crossValidateThresholds, testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
 % COMPUTECROSSVALIDATION performs cross-validation for the provided test data, estimated regression coefficients, and specified regression method.
 % 
 % INPUTS:
@@ -10,9 +10,6 @@ function [crossValidateThresholds, allThresholdedCoefficients, bestCoefficients,
 % 
 % OUTPUTS:
 %   Various metrics related to cross-validation, including thresholded coefficients, errors, R-squared values, and the optimal threshold.
-
-% Set threshold values for cross validation to go over
-crossValidateThresholds = setCrossValidationThreshold(beta0);
 
 % Handle OLS regression method
 if strcmp(regressionMethod, 'OLS')
@@ -111,10 +108,6 @@ end
 % The out-of-sample error and r^2 are then those cumputed from the optimally
 % weighted coefficients.
 optimallyWeightedThresholdedCoefficients = thresholdedCoefficientsOverDifferentWeights(:, idxOptimalWeight);
-end
-
-function crossValidateThresholds = setCrossValidationThreshold(beta0)
-crossValidateThresholds = 0.1:0.1:2*beta0;
 end
 
 function weights = setWeightsRange()

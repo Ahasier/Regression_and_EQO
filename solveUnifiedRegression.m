@@ -11,7 +11,7 @@ function estimatedCoefficients = solveUnifiedRegression(trainingData, trainingOu
 %   estimatedCoefficients: Matrix of estimated regression coefficients for each value of Lambda.
 
 % Initialize the size of the output matrix
-Lambda = 0:0.1:settings.maxLambda;
+Lambda = setLambdaRange(settings.maxLambda);
 estimatedCoefficients = zeros(size(trainingData, 2), length(Lambda));
 
 for m = 1:length(Lambda)

@@ -81,19 +81,13 @@ end
 
 % Generates synthetic microbial abundance data using either a model to mimic real data or a normal distribution.
 function taxaAbundance = generateAbundanceData(treeData, numberOfSamples, settings)
-% If generating mimic-real abundance data, generate them from the specific long-tail (Pareto) distribution
+[xm, a] = setMimicRealAbundanceDistributionParameters();
+
 if generateMimicRealAbundance(settings)
-    % Set parameter values for the distribution of mimic-real taxa abundance
-    [xm, a] = setMimicRealAbundanceDistributionParameters();
-    
-    % Randomly generate taxa abundance data from the determined distribution
     Nseed = rand(treeData.NumLeaves, numberOfSamples)';
     taxaAbundance = (- xm * (-1 + (1 - Nseed).^(1/a))) ./ ((1 - Nseed).^(1/a));
-    
-    % Taxa abundance takes integer values
     taxaAbundance = floor(taxaAbundance);
 else
-    % Otherwise, generate abundance data from a random Guassian.
     taxaAbundance = normrnd(10, 10, treeData.NumLeaves, numberOfSamples)';
 end
 end
@@ -108,8 +102,8 @@ function isRealAbundance = generateMimicRealAbundance(settings)
 isRealAbundance = isfield(settings, 'RealAbd') && strcmp(settings.RealAbd, 'On');
 end
 
-% Set parameter values for the distribution of mimic-real abundance matrix elements.
-function [xm, a] = setMimicRealAbundanceDistributionParameters()
+% Set parameter values for the distribution of mimic-real abundance matrix.
+function [xm, a] = setMimicRealAbundanceDistributionParameters();
 xm = 87.71;
 a = 4.254;
 end
