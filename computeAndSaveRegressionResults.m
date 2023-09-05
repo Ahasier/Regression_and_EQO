@@ -64,11 +64,10 @@ function [results, resultsForDiagnostics] = processRealData(settings, treeData, 
 [abundanceData, functionalOutput] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
 
 % Compute regression and cross-validation over different thresholds on data
-[allCoefficients, allBestCoefficients, crossValidatedCoefficients, allOutSampleErrorsAtAllThresholds, crossValidatedOutSampleError, allOutSampleR2AtAllThresholds, allOptimalThresholds, coefficientsStdDev] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings.Beta0);
+[crossValidatedCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
 
 % Return results as a structure
 results = struct('abundanceData', abundanceData, 'functionalOutput', functionalOutput, 'crossValidatedCoefficients', crossValidatedCoefficients, 'coefficientsStdDev', coefficientsStdDev, 'MeanSquaredErrorOutOfSample', crossValidatedOutSampleError);
-resultsForDiagnostics = struct('allCoefficients', allCoefficients, 'allBestCoefficients', allBestCoefficients, 'allErrorsAtAllThresholds', allOutSampleErrorsAtAllThresholds, 'allOutSampleR2AtAllThresholds', allOutSampleR2AtAllThresholds, 'allOptimalThresholds', allOptimalThresholds);
 end
 
 function [results, resultsForDiagnostics] = processSyntheticData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)

@@ -1,5 +1,5 @@
 % Compute the R2 values and Squared Error for given data and coefficients
-function R2 = computeRSquared(abundanceData, actualOutput, coefficients)
+function [R2, SSR] = computeRSquared(abundanceData, actualOutput, coefficients)
 % Compute predicted values for the test set
 predictedOutput = abundanceData * coefficients;
 % Compute residuals

@@ -1,4 +1,4 @@
-function [allThresholdedCoefficients, bestCoefficients, allOutSampleErrors, bestOutSampleError, allR2OutSample, optimalThreshold] = computeCrossValidation(crossValidateThresholds, testData, testOutput, estimatedCoefficients, regressionMethod, beta0)
+function [allThresholdedCoefficients, bestCoefficients, allOutSampleErrors, bestOutSampleError, allR2OutSample, optimalThreshold] = computeCrossValidation(crossValidateThresholds, testData, testOutput, estimatedCoefficients, regressionMethod)
 % COMPUTECROSSVALIDATION performs cross-validation for the provided test data, estimated regression coefficients, and specified regression method.
 % 
 % INPUTS:
@@ -18,7 +18,6 @@ else
     % Handle other regression methods
     [allThresholdedCoefficients, allOutSampleErrors, allR2OutSample] = handleCrossValidationForOthers(crossValidateThresholds, testData, testOutput, estimatedCoefficients);
 end
-
 % Find the threshold that gives the minimum out-of-sample error
 [bestOutSampleError, idx] = min(allOutSampleErrors(:));
 bestCoefficients = allThresholdedCoefficients(:, idx);
@@ -81,37 +80,6 @@ for l = 1:len1
         allThresholdedCoefficients(:, l, k) = optimallyWeightedThresholdedCoefficients;
     end
 end
-end
-
-function [optimallyWeightedThresholdedCoefficients, optimallyWeightedThresholdedOutSampleError] = pickOptimalWeightForThresholding(weights, threshold, estimatedCoefficients, testData, testOutput)
-% Initialize weighted coefficients and out of sample mean squared errors over different weights
-lenWeights = length(weights);
-numTaxa = size(estimatedCoefficients, 1);
-OutSampleErrorsOverDifferentWeights = zeros(1,lenWeights);
-thresholdedCoefficientsOverDifferentWeights = zeros(numTaxa, lenWeights);
-
-% Compute the binary vector of whether coefficients exceed threshold
-binaryCoefficients = estimatedCoefficients >= threshold;
-
-% Loop over different weights, threshold coefficients and compute out-of-sample
-% errors on the test data
-for w = 1:lenWeights
-    weight = weights(w);
-    thresholdedCoefficients = weight.*binaryCoefficients.*estimatedCoefficients;
-    OutSampleErrorsOverDifferentWeights(w) = computeSquaredError(testData, testOutput, thresholdedCoefficients);
-    thresholdedCoefficientsOverDifferentWeights(:, w) = thresholdedCoefficients;
-end
-
-% Pick the optimal weight
-[optimallyWeightedThresholdedOutSampleError, idxOptimalWeight] = min(OutSampleErrorsOverDifferentWeights);
-
-% The out-of-sample error and r^2 are then those cumputed from the optimally
-% weighted coefficients.
-optimallyWeightedThresholdedCoefficients = thresholdedCoefficientsOverDifferentWeights(:, idxOptimalWeight);
-end
-
-function weights = setWeightsRange()
-weights = 0.8:0.001:2;
 end
 
 function optimalThreshold = findOptimalThreshold(regressionMethod, crossValidateThresholds, idx, estimatedCoefficients)
