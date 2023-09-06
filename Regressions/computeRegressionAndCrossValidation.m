@@ -11,7 +11,7 @@ function [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCros
 % OUTPUTS:
 %   Various metrics related to the integrated regression and cross-validation process, including coefficients, out-of-sample errors, R-squared values, and optimal thresholds.
 
-% Check for AIC setting
+% Check for AIC Setting
 if isfield(settings, 'Threshold') && isnan(settings.Threshold)
     [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaAIC(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
     
