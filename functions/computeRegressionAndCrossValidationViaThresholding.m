@@ -1,10 +1,9 @@
 function [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaThresholding(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
 % Set threshold values for cross validation to go over
-crossValidateThresholds = setCrossValidationThreshold(settings.beta0);
+crossValidateThresholds = setCrossValidationThreshold(settings.Beta0);
 
 % Initialize output results variables
 [allCoefficients, allBestCoefficients, allOutSampleErrors, allBestOutSampleErrors, allOutSampleR2, allOptimalThresholds] = initializeCrossValidationResults(abundanceData, regressionMethod, numPermutations, crossValidateThresholds, settings);
-
 
 % Loop over various permutations
 for i = 1:numPermutations
@@ -59,10 +58,6 @@ else
     allOutSampleR2 = zeros(numLambda, numThresholds,numPermutations);
     allOptimalThresholds = zeros(numLambda,  numPermutations);
 end
-end
-
-function crossValidateThresholds = setCrossValidationThreshold(beta0)
-crossValidateThresholds = 0.1:0.1:2*beta0;
 end
 
 function [avgBestCoefficients, resultsForDiagnostics] = aggregateCrossValidationResults(allCoefficients, allOutSampleErrors, allOutSampleR2, allOptimalThresholds, allBestCoefficients, allBestOutSampleErrors)

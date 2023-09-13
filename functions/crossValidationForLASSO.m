@@ -2,9 +2,9 @@ function [optimalCoefficients, optimalLambda, bestOutSampleError] = crossValidat
 % initialize variables
 Lambda = setLambdaRange(maxLambda);
 len1 = length(Lambda);
-allOutSampleErrors = zeros(len1, len2);
-allR2OutSample = zeros(len1, len2);
-allCoefficients = zeros(size(coefficients, 1), len1, len2);
+allOutSampleErrors = zeros(len1, 1);
+allR2OutSample = zeros(len1, 1);
+allCoefficients = zeros(size(coefficients, 1), len1);
 weights = setWeightsRange();
 
 % Loop through all regresssion (lambda) parameters
@@ -19,7 +19,7 @@ for l = 1:len1
     % Store results
     allR2OutSample(l) = computeRSquared(testData, testOutput, optimallyWeightedCoefficients);
     allOutSampleErrors(l) = optimallyWeightedOutSampleError;
-    allCoefficients(:, l) = optimallyWeightedThresholdedCoefficients;
+    allCoefficients(:, l) = optimallyWeightedCoefficients;
 end
 [bestOutSampleError, idx] = min(allOutSampleErrors(:));
 optimalCoefficients = allCoefficients(:, idx);

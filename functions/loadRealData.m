@@ -9,27 +9,25 @@ function [taxaAbundance, observableOutput] = loadRealData(numberOfSamples)
 %   taxaAbundance: Matrix containing taxa abundance data (samples x taxa).
 %   observableOutput: Vector containing observed functional outputs (samples x 1).
 
-% Paths and constants
-[pathToData, ~, ~, pathToAbundanceAndFunctionalOutputs] = SetPathsForDataAndResults();
-
 % Load tree data and the metadata data
-treeData = loadRealTreeData(pathToData);
-metaTaraData = loadMetaTaraData(pathToData);
+treeData = loadRealTreeData();
+metaTaraData = loadMetaTaraData();
 
 % Extract Nitrate (NO3) data and initial taxa abundance
 nitrateData = extractNitrateData(metaTaraData);
 initialTaxaAbundance = treeData.N1;
 
 % Create subsets of data and save them
-taxaAbundance = createAndSaveSubsetsOfData(nitrateData, initialTaxaAbundance, numberOfSamples, pathToAbundanceAndFunctionalOutputs);
+taxaAbundance = createAndSaveSubsetsOfData(nitrateData, initialTaxaAbundance, numberOfSamples);
 observableOutput = nitrateData;
 end
 
 %% Helper functions
-% Load tree data from a file
-function treeData = loadRealTreeData(pathToData)
-filePath = [pathToData, 'tree100taxaReal.mat'];
-treeData = load(filePath);
+% Load Meta Tara data
+function metaTaraData = loadMetaTaraData()
+pathToData = SetPathsForDataAndResults('data');
+pathToMetaTaraData = [pathToData, 'Meta_Tara.csv'];
+metaTaraData = readtable(pathToMetaTaraData);
 end
 
 % Extract nitrate data column (NO3) from Meta Tara data table
@@ -39,7 +37,9 @@ end
 
 % Create a random subset of data based on the number of samples in the subset,
 % save the subset to files, and return this subset of taxa abundance data
-function taxaAbundance = createAndSaveSubsetsOfData(nitrateData, initialTaxaAbundance, numSamples, pathToNAndX)
+function taxaAbundance = createAndSaveSubsetsOfData(nitrateData, initialTaxaAbundance, numSamples)
+% Set path to save real abundance and functional responses data
+pathToNAndX = SetPathsForDataAndResults('NAndX');
 sampleIndices = randperm(length(nitrateData), numSamples);
 
 ObservableOutput = nitrateData(sampleIndices);

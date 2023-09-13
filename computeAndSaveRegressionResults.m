@@ -53,7 +53,7 @@ addpath(functionsPath);
 end
 
 function [treeData, settings, fullIdentifier, resultsPath, betaResultsPath] = setupPathsAndSettings(varargin)
-[dataPath, resultsPath, betaResultsPath] = SetPathsForDataAndResults();
+[dataPath, resultsPath, betaResultsPath] = SetPathsForDataAndResults('data', 'results', 'betaResults');
 load([dataPath,'tree100taxa.mat']);
 treeData = tree100;
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});

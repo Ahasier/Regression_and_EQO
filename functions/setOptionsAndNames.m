@@ -15,6 +15,15 @@ end
 % Initialize options as an empty struct
 settings = struct();
 
+% Set default values
+settings.Beta0 = 1;
+settings.BetaEps = 0;
+settings.Threshold = nan;
+settings.requirePositivity = 'Off';
+settings.RealAbd = 'Off';
+settings.DiagnosticMod = 'Off';
+settings.maxLambda = 10;
+
 % Populate the settings struct with name-value pairs
 for i = 1:2:length(varargin)
     % varargin{i} is the option, varargin{i+1} is the value
@@ -31,11 +40,6 @@ for n = 1:length(optionnames)
     strValue = getValueAsString(settings.(optionnames{n}));
     addStr = ['_', strName, strValue];
     fullIdentifier = [fullIdentifier, addStr];
-end
-
-% Set default value for BetaEps if it's not provided
-if ~isfield(settings, 'BetaEps')
-    settings.BetaEps = 0;
 end
 end
 

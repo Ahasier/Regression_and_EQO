@@ -1,6 +1,6 @@
 function [optimalCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaAIC(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
 % Initialize variables to store AIC values and corresponding coefficients
-[allBinaryCoefficients, allAicValues, allOutSampleR2] = initializeAICCrossValidationResults();
+[allBinaryCoefficients, allOptimalGroupSize, allAicValues, allOutSampleR2] = initializeAICCrossValidationResults(abundanceData, numPermutations);
 if ~strcmp(regressionMethod, 'OLS')
     optimalLambda = zeros(1,numPermutations);
 end
@@ -19,44 +19,48 @@ for i = 1:numPermutations
     
     % Step (b) 2: Calculate the AIC values under different group sizes to find the optimal one
     aicValues = evaluateAIC(trainingData, trainingOutput, coefficients);
-    [minimalAicValue, optimalGroupSize] = findMinimalAic(aicValues);
+    [~, optimalGroupSize] = findMinimalAic(aicValues);
     
     % Step (c): Calculate the binary results (sparsified from AIC step) and 
     % cross-validation R^2 on test subset
     binaryCoefficients = binaralizeCoefficientsViaAIC(coefficients, optimalGroupSize);
+    R2InSamples = computeRSquared(trainingData, trainingOutput, coefficients);
     R2OutSamples = computeRSquared(testData, testOutput, binaryCoefficients);
     
     % Store results
     allBinaryCoefficients(:, i) = binaryCoefficients;
+    allOptimalGroupSize(i) = optimalGroupSize;
     allOutSampleR2(i) = R2OutSamples;
-    allAicValues(i,:) = aicValues;
+    allAicValues(:, i) = aicValues;
 end
 
 % Step (d) 1: Calculate the cumulative R^2 for each taxon
 cumulativeR2 = calculateCumulativeR2(numPermutations, abundanceData, allBinaryCoefficients, allOutSampleR2);
 
 % Step (d) 2: Get the best coefficients by selecting the top k = optimalGroupSize taxa based on cumulative R^2
-optimalCoefficients = selectTopKTaxa(cumulativeR2, optimalGroupSize, allBinaryCoefficients);
+avgOptimalGroupSize = median(allOptimalGroupSize);
+optimalCoefficients = selectTopKTaxa(cumulativeR2, avgOptimalGroupSize, allBinaryCoefficients);
 
 % Store results as a structure
 if ~strcmp(regressionMethod, 'OLS')
-    resultsForDiagnostics = struct('allBinaryCoefficients', allBinaryCoefficients, 'allOutSampleR2', allOutSampleR2, 'minimalAicValue', minimalAicValue, 'cumulativeR2', cumulativeR2);
+    resultsForDiagnostics = struct('allBinaryCoefficients', allBinaryCoefficients, 'allOutSampleR2', allOutSampleR2, 'optimalLambda', optimalLambda, 'avgOptimalGroupSize', avgOptimalGroupSize, 'cumulativeR2', cumulativeR2);
 else
-    resultsForDiagnostics = struct('allBinaryCoefficients', allBinaryCoefficients, 'allOutSampleR2', allOutSampleR2, 'optimalLambda', optimalLambda, 'minimalAicValue', minimalAicValue, 'cumulativeR2', cumulativeR2);
+    resultsForDiagnostics = struct('allBinaryCoefficients', allBinaryCoefficients, 'allOutSampleR2', allOutSampleR2, 'avgOptimalGroupSize', avgOptimalGroupSize, 'cumulativeR2', cumulativeR2);
 end
 end
 
 %% Helper functions
-function [allCoefficients, aicValues, allOutSampleR2] = initializeAICCrossValidationResults(abundanceData, numPermutations)
+function [allCoefficients, allOptimalGroupSize, aicValues, allOutSampleR2] = initializeAICCrossValidationResults(abundanceData, numPermutations)
 allCoefficients = zeros(size(abundanceData, 2), numPermutations);
+allOptimalGroupSize = zeros(1, numPermutations);
 allOutSampleR2 = zeros(1, numPermutations);
 aicValues = zeros(size(abundanceData, 2), numPermutations);
 end
 
 % Calculate the AIC values under different group sizes
-function aicValue = evaluateAIC(trainingData, trainingOutput, coefficients)
+function aicValues = evaluateAIC(trainingData, trainingOutput, coefficients)
 % Initialization
-aicValue = zeros(1,length(coefficients));
+aicValues = zeros(length(coefficients), 1);
 
 % Sort coefficients by descend for later use
 [~, sortedTaxaIndices] = sort(coefficients, 'descend');
@@ -67,26 +71,25 @@ for n = 1:length(coefficients)
     groupAssemblage = zeros(length(coefficients), 1);
     groupAssemblage(idx) = 1;
     
-    [r2, ssr] = computeRSquared(trainingData, trainingOutput, groupAssemblage);
+    logLikelihood = regressionLikelihood(trainingData, trainingOutput, groupAssemblage);
     
-    k = size(trainingData, 2) + 1; % Number of predictors + intercept
-    L = exp(-ssr/2);
-    aic = 2*k - 2*log(L);
+%     [r2, ssr] = computeRSquared(trainingData, trainingOutput, groupAssemblage);
+%     L = exp(-ssr/2);
+    aic = - 2*n - 2*logLikelihood;
     
     % Store the AIC value
-    aicValue(n) = aic;
+    aicValues(n) = aic;
 end
 end
 
 % Find the optimal group size by minimizing AIC values
 function [minimalAicValue, optimalGroupSize] = findMinimalAic(aicValues)
-avgAicValues = mean(aicValues);
-[minimalAicValue, optimalGroupSize] = min(avgAicValues);
+[minimalAicValue, optimalGroupSize] = min(aicValues);
 end
 
 % Calculate the binary coefficients sparsified from AIC step
 function binaryCoefficients = binaralizeCoefficientsViaAIC(coefficients, optimalGroupSize)
-binaryCoefficients = ones(size(allCoefficients, 1), 1);
+binaryCoefficients = ones(size(coefficients, 1), 1);
 
 % Sort coefficients by descend for later use
 [~, sortedTaxaIndices] = sort(coefficients, 'descend');
@@ -103,13 +106,16 @@ end
 end
 
 % Step 6: Calculate the cumulative R^2 for each taxon
-function cumulativeR2 = calculateCumulativeR2(numPermutations, abundanceData, allCoefficients, allOutSampleR2)
+function normalizedCumulativeR2 = calculateCumulativeR2(numPermutations, abundanceData, allCoefficients, allOutSampleR2)
 cumulativeR2 = zeros(size(abundanceData, 2), 1);
 for taxonIdx = 1:size(abundanceData, 2)
     for permIdx = 1:numPermutations
         cumulativeR2(taxonIdx) = cumulativeR2(taxonIdx) + allCoefficients(taxonIdx, permIdx) * allOutSampleR2(permIdx);
     end
 end
+
+% Normalize to the maximal importance
+normalizedCumulativeR2 = cumulativeR2./max(cumulativeR2);
 end
 
 % Get bet best coefficients by selecting the top k taxa based on cumulative R^2

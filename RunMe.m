@@ -1,3 +1,4 @@
+clc;clear
 %% Add path
 added_path = [pwd,'/functions'];
 addpath(added_path);
@@ -13,8 +14,8 @@ numSamples_list = [40 80 120]; % Set the number of samples
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'LASSO';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 'cv','RealAbd','On','DiagnosticMod', 'On', 'maxLambda', 10};
+regressionMethod = 'OLS';
+varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', nan, 'RealAbd','On','DiagnosticMod', 'On', 'requirePositivity', 'On'};
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
 
 %% Run computeAndSaveRegressionResults to get results files

@@ -11,12 +11,12 @@ function [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCros
 % OUTPUTS:
 %   Various metrics related to the integrated regression and cross-validation process, including coefficients, out-of-sample errors, R-squared values, and optimal thresholds.
 
-% Check for AIC Setting
-if isfield(settings, 'Threshold') && isnan(settings.Threshold)
-    [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaAIC(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
-    
-elseif strcmp(settings.Threshold, 'cv') % Check if cross-validating over different threshold
+% Check if cross-validating over different threshold
+if isfield(settings, 'Threshold') && strcmp(settings.Threshold, 'cv')
     [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaThresholding(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+    
+elseif isnan(settings.Threshold) % Check for AIC Setting
+    [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationViaAIC(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
     
 else % Otherwise, using a given threshold
     [avgBestCoefficients, resultsForDiagnostics] = computeRegressionAndCrossValidationGivenThreshold(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);

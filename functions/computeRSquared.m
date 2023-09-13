@@ -7,7 +7,7 @@ residuals = actualOutput - predictedOutput;
 % Compute sum of squared residuals
 SSR = sum((residuals).^2);
 % Compute total sum of squares
-TSS = std(actualOutput, 0,1 );
+TSS = sum((actualOutput - mean(actualOutput)).^2);
 % Calculate R2 as 1 minus the ratio of SSR to TSS
 R2 = 1 - (SSR / TSS);
 end

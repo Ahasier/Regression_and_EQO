@@ -15,14 +15,15 @@ for i = 1:numPermutations
     % Step 3: Cross-validation on testing data
     % Handle OLS regression method
     if strcmp(regressionMethod, 'OLS')
-        [thresholedCoefficients, ~, outSampleError] = crossValidationForLASSO(testData, testOutput, coefficients, maxLambda, settings.Threshold);
+        [thresholedCoefficients, outSampleError] = thresholdOLSCoefficients(testData, testOutput, coefficients, settings.Threshold);
     else
         % Handle other regression methods
-        [thresholedCoefficients, outSampleError] = thresholdOLSCoefficients(testData, testOutput, coefficients, settings.Threshold);
+        [thresholedCoefficients, ~, outSampleError] = crossValidationForLASSO(testData, testOutput, coefficients, settings.maxLambda, settings.Threshold);
+        
     end
     
     % Step 4: Store results
-    [allCoefficients(:, i), allOutSampleErrors(i)] = storeThresholdedResults(thresholedCoefficients, outSampleError, R2OutSamples);
+    [allCoefficients(:, i), allOutSampleErrors(i)] = storeThresholdedResults(thresholedCoefficients, outSampleError);
 end
 
 % Aggregate results
@@ -37,4 +38,9 @@ end
 function [thisCoefficient, thisOutSampleErrors] = storeThresholdedResults(thresholedCoefficients, outSampleError)
 thisCoefficient = thresholedCoefficients;
 thisOutSampleErrors = outSampleError;
+end
+
+function [thresholedCoefficients, outSampleError] = thresholdOLSCoefficients(testData, testOutput, coefficients, threshold)
+thresholedCoefficients = coefficients > threshold;
+outSampleError = computeSquaredError(testData, testOutput, thresholedCoefficients);
 end

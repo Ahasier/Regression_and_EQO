@@ -43,7 +43,7 @@ beta = defineOptimizationVariable(requirePositivity, trainingData);
 residual = trainingData * beta - functionalOutput;
 
 % Define the LASSO objective function
-obj = sum(residual.^2) + lambda * sum(sqrt(beta.^2));
+obj = sum(residual.^2) + lambda * sum(beta.^2);
 
 % Create the optimization problem
 prob = optimproblem('Objective', obj);
@@ -167,7 +167,7 @@ x0.beta = zeros(size(trainingData, 2), 1)';
 end
 
 function beta = defineOptimizationVariable(requirePositivity, trainingData)
-if isfield(settings, 'requirePositivity') && strcmp(requirePositivity, 'On')
+if strcmp(requirePositivity, 'On')
     beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
 else
     beta = optimvar('beta', size(trainingData, 2));

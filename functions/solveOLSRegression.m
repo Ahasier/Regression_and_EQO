@@ -1,4 +1,4 @@
-function estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput, ~)
+function estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput, settings)
 % SOLVEOLSREGRESSION performs OLS regression to estimate the 
 % association between microbial abundance data and a functional output. 
 %
@@ -10,17 +10,19 @@ function estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput
 % OUTPUT:
 %   estimatedCoefficients: Vector containing the estimated regression coefficients after permutations.
 
-% % Construct the optimization problem
-% [regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, [], 'OLS', settings);
-% 
-% % Solve the optimization problem
-% opts = optimoptions('ga');
-% sol = solve(regressionModel, x0, 'Options', opts);
-% 
-% % Get estimated coefficients on current training samples
-% estimatedCoefficients = sol.beta;
-
-estimatedCoefficients = trainingOutput / trainingData;
+if strcmp(settings.requirePositivity, 'Off')
+    estimatedCoefficients = trainingData \ trainingOutput;
+else
+    % Construct the optimization problem
+    [regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, [], 'OLS', settings);
+    
+    % Solve the optimization problem
+    opts = optimoptions('ga');
+    sol = solve(regressionModel, x0, 'Options', opts);
+    
+    % Get estimated coefficients on current training samples
+    estimatedCoefficients = sol.beta;
+end
 
 % Handle extra features if needed
 % estimatedCoefficients = handleExtraPhylogeneticFeatures(estimatedCoefficients, abundanceData, TaraNames, Idx, Ladd);
