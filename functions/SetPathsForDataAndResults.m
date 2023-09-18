@@ -2,6 +2,8 @@ function paths = SetPathsForDataAndResults(varargin)
 % Define the paths for data and results directories
 dataPath = 'data/';
 resultsPath = 'results/';
+tcmResultsPath = 'results/TCMs/';
+accuracyResultsPath = 'results/Accuracy/';
 betaResultsPath = 'results/Betas/';
 NAndXPath = [resultsPath,'NX/'];
 
@@ -13,6 +15,10 @@ for i = 1:nargin
         paths.resultsPath = resultsPath;
     elseif strcmp(varargin{i}, 'betaResults')
         paths.betaResultsPath = betaResultsPath;
+    elseif strcmp(varargin{i}, 'accuracyResults')
+        paths.accuracyResultsPath = accuracyResultsPath;
+    elseif strcmp(varargin{i}, 'tcmResults')
+        paths.tcmResultsPath = tcmResultsPath;
     elseif strcmp(varargin{i}, 'NAndX')
         paths.NAndX = NAndXPath;
     else

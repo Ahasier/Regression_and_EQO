@@ -20,7 +20,7 @@ regressionMethod = 'EQO';
 varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 0.5, 'RealAbd','On', 'requirePositivity', 'On'};
 
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
-paths = SetPathsForDataAndResults('data', 'results', 'betaResults');
+paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');
 
 %% Run computeAndSaveRegressionResults to get results files
 for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
@@ -40,7 +40,7 @@ end
 
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
 % load OLSBeta0Map and EQOMap from file
-OLSBeta0Map = accessToAccMap('results/', regressionMethod, fullIdentifier, 'Load');
+OLSBeta0Map = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier, 'Load');
 OLSBeta0Map = OLSBeta0Map(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 
 EQOMap = accessToEQOMap(settings.Beta0, settings.BetaEps, 'Load');
@@ -55,7 +55,7 @@ h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSBeta0Map, 'OLS');
 subplot(1,3,3)
 h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, OLSBeta0Map, 'OLS', EQOMap, 'EQO');
 
-saveas(gcf,['results/Heatmap',fullIdentifier,'.jpg'])
+saveas(gcf,['results/plots/Heatmap',fullIdentifier,'.jpg'])
 end
 
 function resultMap = accessToAccMap(resultsPath, regressionMethod, fullIdentifier, saveOrLoad)
@@ -66,7 +66,7 @@ end
 end
 
 function resultMap = accessToEQOMap(Beta0, BetaEps, saveOrLoad)
-filename = ['results/AccMCC_Beta0',num2str(Beta0),'_BetaEps',num2str(BetaEps),'_RealAbdOn_EQO.csv'];
+filename = ['results/Accuracy/AccMCC_Beta0',num2str(Beta0),'_BetaEps',num2str(BetaEps),'_RealAbdOn_EQO.csv'];
 if strcmp(saveOrLoad, 'Load')
     resultMap = csvread(filename);
 end

@@ -22,7 +22,7 @@ for groupSize = 1:numTaxa
     delayInSeconds = 10; % Delay between checks
     
     for attempt = 1:maxAttempts
-        if exist('EQO/data/coefficients.csv', 'file') == 2
+        if exist('data/coefficients.csv', 'file') == 2
             % File exists, break out of the loop
             break;
         else
@@ -32,13 +32,13 @@ for groupSize = 1:numTaxa
     end
     
     % Read results back from R
-    coefficients = csvread('data/coefficients.csv');
+    coefficients = csvread('data/coefficients.csv', 1, 0);
     
     % Sort coefficients by descend for later use
     [~, sortedTaxaIndices] = sort(coefficients, 'descend');
     
     % calculate the AIC value in this group size.
-    aicValues(groupSize) = computeAIC(numTaxa, trainingData, trainingOutput, sortedTaxaIndices);
+    aicValues(groupSize) = computeAIC(groupSize, numTaxa, trainingData, trainingOutput, sortedTaxaIndices);
     
     % Store coefficients results
     allCoefficients(:, groupSize) = coefficients;
@@ -53,6 +53,5 @@ binaryCoefficients = allCoefficients(:, optimalGroupSize);
 % Delete the intermediate CSV files
 delete('EQO/data/trainingData.csv');
 delete('EQO/data/trainingOutput.csv');
-delete('EQO/data/numTaxa.csv');
-delete('EQO/data/coefficients.csv');
+delete('data/coefficients.csv');
 end

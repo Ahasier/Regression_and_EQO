@@ -9,6 +9,6 @@ aicValues = zeros(length(coefficients), 1);
 
 % Loop over different group sizes and compute the corresponding AIC values
 for n = 1:numTaxa
-    aicValues(n) = computeAIC(numTaxa, trainingData, trainingOutput, sortedTaxaIndices);
+    aicValues(n) = computeAIC(n, numTaxa, trainingData, trainingOutput, sortedTaxaIndices);
 end
 end

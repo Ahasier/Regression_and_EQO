@@ -1,4 +1,4 @@
-function aicValue = computeAIC(numTaxa, trainingData, trainingOutput, sortedTaxaIndices)
+function aicValue = computeAIC(n, numTaxa, trainingData, trainingOutput, sortedTaxaIndices)
 idx = sortedTaxaIndices(n + 1:end);
 groupAssemblage = ones(numTaxa, 1);
 %     groupAssemblage = coefficients;
