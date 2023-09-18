@@ -5,8 +5,8 @@ aicValues = zeros(1, numTaxa);
 allCoefficients = zeros(numTaxa, numTaxa);
 
 % Save training data and output to CSV files for R to read
-csvwrite('EQO/data/trainingData.csv', trainingData);
-csvwrite('EQO/data/trainingOutput.csv', trainingOutput);
+csvwrite('../EQO/data/trainingData.csv', trainingData);
+csvwrite('../EQO/data/trainingOutput.csv', trainingOutput);
 
 % Loop across different group sizes
 for groupSize = 1:numTaxa
@@ -14,7 +14,7 @@ for groupSize = 1:numTaxa
     setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
     
     % Call R script using system command
-    commandStr = sprintf('Rscript EQO/EQO_GA_script.R %d', groupSize);
+    commandStr = sprintf('Rscript ../EQO/EQO_GA_script.R %d', groupSize);
     system(commandStr);
     
     % Check for the existence of the coefficients.csv file
@@ -22,7 +22,7 @@ for groupSize = 1:numTaxa
     delayInSeconds = 10; % Delay between checks
     
     for attempt = 1:maxAttempts
-        if exist('EQO/data/coefficients.csv', 'file') == 2
+        if exist('coefficients.csv', 'file') == 2
             % File exists, break out of the loop
             break;
         else
@@ -32,7 +32,7 @@ for groupSize = 1:numTaxa
     end
     
     % Read results back from R
-    coefficients = csvread('data/coefficients.csv');
+    coefficients = csvread('../EQO/data/coefficients.csv');
     
     % Sort coefficients by descend for later use
     [~, sortedTaxaIndices] = sort(coefficients, 'descend');
@@ -51,8 +51,8 @@ end
 binaryCoefficients = allCoefficients(:, optimalGroupSize);
 
 % Delete the intermediate CSV files
-delete('EQO/data/trainingData.csv');
-delete('EQO/data/trainingOutput.csv');
-delete('EQO/data/numTaxa.csv');
-delete('EQO/data/coefficients.csv');
+delete('../EQO/data/trainingData.csv');
+delete('../EQO/data/trainingOutput.csv');
+delete('../EQO/data/numTaxa.csv');
+delete('../EQO/data/coefficients.csv');
 end
