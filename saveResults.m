@@ -1,4 +1,4 @@
-function saveResults(results, resultsPath, betaResultsPath, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid)
+function saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid)
 % SAVERESULTS Save regression results to CSV and MAT files.
 %
 % INPUTS:
@@ -14,8 +14,11 @@ function saveResults(results, resultsPath, betaResultsPath, regressionMethod, fu
 % OUTPUTS:
 %   Results are saved to files; no direct outputs from the function.
 
+% Recall paths for results storage
+global paths
+
 % Construct the filename where accuracy results will be saved
-filename = [resultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
+filename = [paths.resultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
 
 if usingRealData(settings)
     % If using real data, skip this step
@@ -42,7 +45,7 @@ else
 end
 
 % Construct the file path where other simulation results will be saved
-saveFilePath = [betaResultsPath, 'Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
+saveFilePath = [paths.betaResultsPath, 'Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
 
 % Save various results to a MAT file for later analysis
 save(saveFilePath, 'results');

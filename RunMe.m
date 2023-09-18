@@ -1,7 +1,9 @@
 clc;clear
-%% Add path
-added_path = [pwd,'/functions'];
-addpath(added_path);
+%% Define global variable paths for where to load data or store results
+global paths
+
+%% Add necessary paths
+initializePaths();
 
 %% Set parameters and input arguments
 numPermutations = 100; % Average over 100 permutations
@@ -14,14 +16,16 @@ numSamples_list = [40 80 120]; % Set the number of samples
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'OLS';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', nan, 'RealAbd','On','DiagnosticMod', 'On', 'requirePositivity', 'On'};
+regressionMethod = 'EQO';
+varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 0.5, 'RealAbd','On', 'requirePositivity', 'On'};
+
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
+paths = SetPathsForDataAndResults('data', 'results', 'betaResults');
 
 %% Run computeAndSaveRegressionResults to get results files
 for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
     for numSamples = numSamples_list
-        results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, varargin{:});
+        results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, settings, fullIdentifier);
     end
 end
 
@@ -29,6 +33,11 @@ end
 plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 %% Helper functions
+function initializePaths()
+functionsPath = [pwd, '/functions'];
+addpath(functionsPath);
+end
+
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
 % load OLSBeta0Map and EQOMap from file
 OLSBeta0Map = accessToAccMap('results/', regressionMethod, fullIdentifier, 'Load');
