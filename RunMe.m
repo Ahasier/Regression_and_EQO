@@ -9,7 +9,7 @@ initializePaths();
 setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
 
 %% Set parameters and input arguments
-numPermutations = 1; % Average over 100 permutations
+numPermutations = 100; % Average over 100 permutations
 phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
 noiseLevel = 1; % Noise level = 1
 
@@ -19,8 +19,8 @@ numSamples_list = [40 80 120]; % Set the number of samples
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'EQO';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 0.5, 'RealAbd','On', 'requirePositivity', 'On'};
+regressionMethod = 'OLS';
+varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 'cv', 'RealAbd','On', 'requirePositivity', 'On'};
 
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
 paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');

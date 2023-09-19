@@ -206,7 +206,7 @@ taxaAbundance = taxaAbundance ./ sum(taxaAbundance, 2) .* syntheticRowSums;
 taxaAbundance = floor(taxaAbundance);
 
 % Normalize abundance table on each row
-taxaAbundance = taxaAbundance./sum(taxaAbundance,2);
+% taxaAbundance = taxaAbundance./sum(taxaAbundance,2);
 end
 
 % Set parameter values for the distribution of mimic-real abundance matrix elements.

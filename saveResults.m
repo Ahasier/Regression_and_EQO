@@ -1,4 +1,4 @@
-function saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid)
+function saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, settings, meshGrid)
 % SAVERESULTS Save regression results to CSV and MAT files.
 %
 % INPUTS:
@@ -17,9 +17,13 @@ function saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAG
 % Recall paths for results storage
 global paths
 
-% Write TCM to csv file
-tcmFilename = [paths.tcmResultsPath, 'TCM_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.csv'];
-writetable(results.TCM, tcmFilename);  
+% Check if threshold method is 'cv'
+if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
+else
+    % Write TCM to csv file
+    tcmFilename = [paths.tcmResultsPath, 'TCM_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.csv'];
+    writetable(results.TCM, tcmFilename);
+end
 
 % Construct the filename where accuracy results will be saved
 accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];

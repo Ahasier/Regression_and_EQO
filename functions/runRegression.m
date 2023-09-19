@@ -37,7 +37,7 @@ optimalGroupSize = getGroupSize(binaryCoefficients);
 end
 
 function [thresholdMethod, varargin] = determineThresholdMethod(settings)
-if isstring(settings.Threshold) && strcmp(settings.Threshold, 'cv')
+if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
     thresholdMethod = @runThresholdCrossValidation;
     varargin = settings.Beta0;
 elseif isnumeric(settings.Threshold)

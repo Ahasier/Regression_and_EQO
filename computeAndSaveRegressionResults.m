@@ -21,7 +21,7 @@ treeData = loadTreeData();
 results = processData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
 
 % Save results to disk
-saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, meshGrid);
+saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, settings, meshGrid);
 end
 
 %% Helper functions

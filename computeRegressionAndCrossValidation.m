@@ -14,12 +14,20 @@ function [TCM, importanceValues, crossValidatedCoefficients] = computeRegression
 % 1. Get table of candidate models (TCM)
 [TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
 
-% 2. Get importance values from TCM
-importanceValues = getImportanceValues(TCM);
-
-% 3. Get the cross-validated coefficients
-% crossValidatedCoefficients = pickImportanceValue(importanceValues);
-crossValidatedCoefficients = selectTopKTaxa(importanceValues, optimalGroupSize);
+% Check if threshold method is 'cv'
+if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
+    % If already used optimal threshold through cross-validation, no longer
+    % need to go through extra crpss-validation step.
+    importanceValues = [];
+    crossValidatedCoefficien  ts = median(TCM{1:end-1, :}, 2);
+else
+    % 2. Get importance values from TCM
+    importanceValues = getImportanceValues(TCM);
+    
+    % 3. Get the cross-validated coefficients
+    % crossValidatedCoefficients = pickImportanceValue(importanceValues);
+    crossValidatedCoefficients = selectTopKTaxa(importanceValues, optimalGroupSize);
+end
 end
 
 %% Helper functions
@@ -30,12 +38,17 @@ TCM = initializeTCM(numTaxa, numPermutations);
 optimalGroupSizes = zeros(1, numPermutations);
 
 % Determine which method to use based on settings.Threshold
-[trainingMethod, varargin] = determineMethod(regressionMethod, settings);
+[trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings);
 
 for i = 1:numPermutations
     % Step (a): Split data
     [trainingData, testData, trainingOutput, testOutput] = splitData(abundanceData, functionalOutput);
-
+    
+    % Check if testData and testOutput need to be added to varargin
+    if addTestData
+        [varargin{end + 1:end + 2}] = deal(testData, testOutput);
+    end
+    
     % Step (b): Depending on the threshold value, use regressions or EQO to train on training data
     [coefficients, optimalGroupSizes(i)] = trainingMethod(trainingData, trainingOutput, varargin{:});
     
@@ -68,15 +81,18 @@ colNames = strcat('Assemblage_', arrayfun(@num2str, 1:numPermutations, 'UniformO
 TCM.Properties.VariableNames = colNames;
 end
 
-function [trainingMethod, varargin] = determineMethod(regressionMethod, settings)
+function [trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings)
 if strcmp(regressionMethod, 'EQO')
     trainingMethod = @runEQO;
     varargin = {};
+    addTestData = false;
 else
     varargin = {regressionMethod, settings};
     trainingMethod = @runRegression;
     if ~strcmp(regressionMethod, 'OLS')
-        [varargin{end + 1:end + 2}] = deal(testData, testOutput);
+        addTestData = true; % Set the flag to true if testData and testOutput need to be added
+    else
+        addTestData = false;
     end
 end
 end
