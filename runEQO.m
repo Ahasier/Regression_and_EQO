@@ -10,9 +10,6 @@ csvwrite('EQO/data/trainingOutput.csv', trainingOutput);
 
 % Loop across different group sizes
 for groupSize = 1:numTaxa
-    % Add the Path to `Rscript` to PATH in MATLAB
-    setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
-    
     % Call R script using system command
     commandStr = sprintf('Rscript EQO/EQO_GA_script.R %d', groupSize);
     system(commandStr);

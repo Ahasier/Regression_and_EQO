@@ -5,8 +5,11 @@ global paths
 %% Add necessary paths
 initializePaths();
 
+% Add the Path to `Rscript` to PATH in MATLAB
+setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
+
 %% Set parameters and input arguments
-numPermutations = 100; % Average over 100 permutations
+numPermutations = 1; % Average over 100 permutations
 phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
 noiseLevel = 1; % Noise level = 1
 
