@@ -19,7 +19,7 @@ if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
     % If already used optimal threshold through cross-validation, no longer
     % need to go through extra crpss-validation step.
     importanceValues = [];
-    crossValidatedCoefficien  ts = median(TCM{1:end-1, :}, 2);
+    crossValidatedCoefficients = median(TCM{1:end-1, :}, 2);
 else
     % 2. Get importance values from TCM
     importanceValues = getImportanceValues(TCM);

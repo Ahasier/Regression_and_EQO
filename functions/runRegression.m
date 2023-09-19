@@ -43,6 +43,8 @@ if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
 elseif isnumeric(settings.Threshold)
     thresholdMethod = @runGivenThreshold;
     varargin = settings.Threshold;
+else
+    error('Threshold method must either be "cv" or a given numeric value, or nan.');
 end
 end
 
