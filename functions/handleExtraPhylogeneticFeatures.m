@@ -1,12 +1,8 @@
 % If phylogenetic information is incorporated, update estimated coefficients using extra features. Currently unneeded.
-function updatedBeta = handleExtraPhylogeneticFeatures(AllBeta, TaraNames, Idx, Ladd)
-if useExtraFeatures
-    upAllBeta = AllBeta(1:length(TaraNames));
-    for id = 1:length(Idx)
-        upAllBeta(Ladd(id)) = upAllBeta(Ladd(id)) + AllBeta(length(TaraNames) + Idx(id));
-    end
-    updatedBeta = upAllBeta;
-else
-    updatedBeta = AllBeta;
+function updatedCoefficients = handleExtraPhylogeneticFeatures(coefficients, numTaxa, Idx, addedLeaves)
+updatedAllBeta = coefficients(1:numTaxa);
+for id = 1:length(Idx)
+    updatedAllBeta(addedLeaves(id)) = updatedAllBeta(addedLeaves(id)) + coefficients(numTaxa + Idx(id));
 end
+updatedCoefficients = updatedAllBeta;
 end

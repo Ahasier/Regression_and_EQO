@@ -25,5 +25,7 @@ else
 end
 
 % Handle extra features if needed
-% estimatedCoefficients = handleExtraPhylogeneticFeatures(estimatedCoefficients, abundanceData, TaraNames, Idx, Ladd);
+if useExtraFeatures(settings)
+    estimatedCoefficients = handleExtraPhylogeneticFeatures(estimatedCoefficients, size(trainingData, 2), Idx, addedLeaves);
+end
 end

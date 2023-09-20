@@ -30,8 +30,5 @@ end
 
 % If phylogenetic information is incorporated, use the grouping method to
 % generate the grouped abundance to handle it.
-if useExtraFeatures(settings)
-    [taxaAbundance, addedLeaves, Idx] = groupAbundanceData(taxaAbundance, treeData);
-    varargout = {addedLeaves, Idx};
-end
+[N2, Ladd, Idx] = groupAbundanceData(taxaAbundance, treeData);
 end

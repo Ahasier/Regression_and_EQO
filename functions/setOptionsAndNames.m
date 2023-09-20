@@ -23,6 +23,7 @@ settings.requirePositivity = 'Off';
 settings.RealAbd = 'Off';
 settings.DiagnosticMod = 'Off';
 settings.maxLambda = 10;
+settings.usePhylogeny = 'Off';
 
 % Populate the settings struct with name-value pairs
 for i = 1:2:length(varargin)

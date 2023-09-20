@@ -19,8 +19,8 @@ numSamples_list = [40 80 120]; % Set the number of samples
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'OLS';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', 'cv', 'RealAbd','On', 'requirePositivity', 'On'};
+regressionMethod = 'LASSO';
+varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', nan, 'RealAbd','On', 'requirePositivity', 'On'};
 
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
 paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');
@@ -37,7 +37,7 @@ plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, num
 
 %% Helper functions
 function initializePaths()
-functionsPath = [pwd, '/functions'];
+functionsPath = [pwd, '/functions/'];
 addpath(functionsPath);
 end
 
