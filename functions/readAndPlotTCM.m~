@@ -1,0 +1,51 @@
+function readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
+taxaIndices = 1:100;
+assemblageIndices = 1:100;
+
+figure('Renderer', 'painters', 'Position', [0 0 1000 800]);
+
+for n = 1:length(numberOfTaxaInAGroup_list)
+    numberOfTaxaInAGroup = numberOfTaxaInAGroup_list(n);
+    for m = 1:length(numSamples_list)
+        numSamples = numSamples_list(m);
+        
+        [TCM, R2] = readTCMTable(regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples);
+        
+        plotTCM(TCM, R2, regressionMethod, fullIdentifier, n, m, numberOfTaxaInAGroup, numSamples);
+    end
+end
+end
+
+function [TCM, R2] = readTCMTable(regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples)
+global paths
+tcmFilename = [paths.tcmResultsPath, 'TCM_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.csv'];
+TCMtable = csvread(tcmFilename, 1, 0);
+TCM = TCMtable(1:end - 1, :);
+R2 = TCMtable(end, :);
+end
+
+function plotTCM(TCM, R2, regressionMethod, fullIdentifier, n, m, numberOfTaxaInAGroup, numSamples)
+subplot(33, 30, subplotPosition(n,m, 'TCM'))
+h1 = imagesc(assemblageIndices, taxaIndices, TCM);
+title(['TCM (', regressionMethod, ', K', num2str(numberOfTaxaInAGroup), ', nSpl', num2str(numSamples), ')'],  'fontsize', 20);
+ylabel("Taxa index", 'fontsize', 20);
+
+subplot(33, 30, subplotPosition(n,m, 'R2'))
+h2 = imagesc(assemblageIndices, 1, R2);
+ylabel("R^2", 'fontsize', 20);
+xlabel("assemblage index", 'fontsize', 20);
+ax1 = plotstyle(gca);
+
+saveas(gcf, ['results/plots/TCM', regressionMethod, fullIdentifier, '.jpg'])
+end
+
+function p = subplotPosition(n,m, flag)
+PlotGrid = reshape( 1:30*33, 30, 33).';
+if strcmp(flag, 'TCM')
+    p = PlotGrid(11*m - 10: 11*m - 1, 10*n - 9: 10*n);
+    p = p(:);
+elseif strcmp(flag, 'R2')
+    p = PlotGrid(11*m, 10*n - 9: 10*n);
+    p = p(:);
+end
+end

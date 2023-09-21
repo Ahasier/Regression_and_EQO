@@ -1,4 +1,4 @@
-function [taxaAbundance, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings)
+function [taxaAbundance, functionalOutput, syntheticCoefficients, extraPhyloVars] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings)
 % GENERATEDATA loads real data or generates synthetic data based on the provided parameters for regression analysis.
 %
 % INPUTS:
@@ -31,7 +31,8 @@ end
 % If phylogenetic information is incorporated, use the grouping method to
 % generate the grouped abundance to handle it.
 if useExtraFeatures(settings)
-    [taxaAbundance, addedLeaves, Idx] = groupAbundanceData(taxaAbundance, treeData);
-    varargout = {addedLeaves, Idx};
+    [taxaAbundance, extraPhyloVars.addedLeaves, extraPhyloVars.Idx] = groupAbundanceData(taxaAbundance, get(treeData));
+else
+    extraPhyloVars = struct();
 end
 end

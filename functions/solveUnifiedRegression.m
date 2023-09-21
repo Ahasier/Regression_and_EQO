@@ -26,6 +26,8 @@ for m = 1:length(Lambda)
     estimatedCoefficients(:, m) = sol.beta;
     
     % (Optional) Adjust coefficients if considering extra phylogenetic features
-    % estimatedCoefficients(:, m) = handleExtraPhylogeneticFeatures(estimatedCoefficients(:, m), TaraNames, Idx, Ladd);
+    if useExtraFeatures(settings)
+        estimatedCoefficients(:, m) = handleExtraPhylogeneticFeatures(estimatedCoefficients(:, m), size(trainingData, 2), extraPhyloVars.Idx, extraPhyloVars.addedLeaves);
+    end
 end
 end

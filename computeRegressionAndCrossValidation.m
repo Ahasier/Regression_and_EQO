@@ -94,6 +94,9 @@ else
     else
         addTestData = false;
     end
+    if isfield(settings, 'usePhylogeny') && strcmp(settings.usePhylogeny, 'On')
+        [varargin{end + 1}] = extraPhyloVars;
+    end
 end
 end
 

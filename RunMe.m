@@ -19,7 +19,7 @@ numSamples_list = [40 80 120]; % Set the number of samples
 meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
 meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
 
-regressionMethod = 'LASSO';
+regressionMethod = 'OLS';
 varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', nan, 'RealAbd','On', 'requirePositivity', 'On'};
 
 [settings, fullIdentifier] = setOptionsAndNames(varargin{:});
@@ -31,6 +31,9 @@ for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
         results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, settings, fullIdentifier);
     end
 end
+
+%% Plot TCMs
+readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
 
 %% Plot heatmaps
 plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
