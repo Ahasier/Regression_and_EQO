@@ -24,10 +24,5 @@ for m = 1:length(Lambda)
     
     % Store the estimated coefficients for the current Lambda on current training samples
     estimatedCoefficients(:, m) = sol.beta;
-    
-    % (Optional) Adjust coefficients if considering extra phylogenetic features
-    if useExtraFeatures(settings)
-        estimatedCoefficients(:, m) = handleExtraPhylogeneticFeatures(estimatedCoefficients(:, m), size(trainingData, 2), extraPhyloVars.Idx, extraPhyloVars.addedLeaves);
-    end
 end
 end

@@ -1,0 +1,9 @@
+{
+    "Beta0": 1,
+    "BetaEps": 0,
+    "Threshold": "NaN",
+    "requirePositivity": "Off",
+    "RealAbd": "Off",
+    "weight": "On",
+    "usePhylogeny": "On"
+}

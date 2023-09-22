@@ -1,5 +1,5 @@
 % Calculate the AIC values under different group sizes
-function aicValues = evaluateAIC(trainingData, trainingOutput, coefficients)
+function aicValues = evaluateAIC(trainingData, trainingOutput, coefficients, settings)
 % Initialization
 numTaxa = length(coefficients);
 aicValues = zeros(length(coefficients), 1);
@@ -9,6 +9,6 @@ aicValues = zeros(length(coefficients), 1);
 
 % Loop over different group sizes and compute the corresponding AIC values
 for n = 1:numTaxa
-    aicValues(n) = computeAIC(n, trainingData, trainingOutput, coefficients, sortedTaxaIndices);
+    aicValues(n) = computeAIC(n, trainingData, trainingOutput, coefficients, sortedTaxaIndices, settings);
 end
 end

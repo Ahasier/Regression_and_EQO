@@ -23,9 +23,4 @@ else
     % Get estimated coefficients on current training samples
     estimatedCoefficients = sol.beta;
 end
-
-% Handle extra features if needed
-if useExtraFeatures(settings)
-    estimatedCoefficients = handleExtraPhylogeneticFeatures(estimatedCoefficients, size(trainingData, 2), extraPhyloVars.Idx, extraPhyloVars.addedLeaves);
-end
 end

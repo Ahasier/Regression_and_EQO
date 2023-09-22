@@ -1,29 +1,20 @@
 clc;clear
-%% Define global variable paths for where to load data or store results
-global paths
+%% Set parameters and input arguments
+[numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup_list, numSamples_list, meshGrid, regressionMethod] = setParams();
+[settings, fullIdentifier] = setOptionsAndNames();
 
-%% Add necessary paths
+%% Set paths
+% Add necessary paths
 initializePaths();
 
-% Add the Path to `Rscript` to PATH in MATLAB
-setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
-
-%% Set parameters and input arguments
-numPermutations = 100; % Average over 100 permutations
-phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
-noiseLevel = 1; % Noise level = 1
-
-numberOfTaxaInAGroup_list = [10 30 50]; % Set the number of taxa within a syntetic functional group
-numSamples_list = [40 80 120]; % Set the number of samples
-
-meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
-meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
-
-regressionMethod = 'OLS';
-varargin = {'Beta0', 1, 'BetaEps', 0.5, 'Threshold', nan, 'RealAbd','On', 'requirePositivity', 'On'};
-
-[settings, fullIdentifier] = setOptionsAndNames(varargin{:});
+% Define global variable paths for where to load data or store results
+global paths
 paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');
+
+% If using EQO, add the path to `Rscript` to PATH in MATLAB
+if strcmp(regressionMethod, 'EQO')
+    setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
+end
 
 %% Run computeAndSaveRegressionResults to get results files
 for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
@@ -42,6 +33,20 @@ plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, num
 function initializePaths()
 functionsPath = [pwd, '/functions/'];
 addpath(functionsPath);
+end
+
+function [numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup_list, numSamples_list, meshGrid, regressionMethod] = setParams()
+numPermutations = 100; % Average over 100 permutations
+phylogenyDependency = 0; % Groung truth beta's are Phylogenetically irrelavent
+noiseLevel = 1; % Noise level = 1
+
+numberOfTaxaInAGroup_list = [10 30 50]; % Set the number of taxa within a syntetic functional group
+numSamples_list = [40 80 100]; % Set the number of samples
+
+meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
+meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
+
+regressionMethod = 'OLS';
 end
 
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)

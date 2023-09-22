@@ -35,10 +35,25 @@ end
 
 function results = processData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
 % 1. Generate Data
-[abundanceData, functionalOutput, syntheticCoefficients] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
+[abundanceData, functionalOutput, varargout] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
+
+% If usimg mock data, retrieve the synthetic coefficients from varargout
+if ~usingRealData(settings)
+    syntheticCoefficients = varargout{1};
+end
+
+% If using incorporating phylogenetic feature, retrieve the grouped
+% abundance and grouping indices, and pass them to
+% `computeRegressionAndCrossValidation`
+if useExtraFeatures(settings)
+    extraPhyloVars = varargout{2};
+    varargin = extraPhyloVars;
+else
+    varargin = {};
+end
 
 % 2. Compute regression and cross-validation over different thresholds on data
-[TCM, importanceValues, crossValidatedCoefficients] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+[TCM, importanceValues, crossValidatedCoefficients] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin);
 
 % 3. If usimg mock data, calculate accuracy
 if ~usingRealData(settings)

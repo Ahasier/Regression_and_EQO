@@ -56,3 +56,19 @@ Regression_and_EQO/
 
 ## Dependencies
 - MATLAB (The version used for this project is not specified, so it is recommended to use a recent version of MATLAB.)
+
+## Configuration settings
+`configurations/config.json` stores the configuration settings for Regression & EQO. The default settings are:
+```
+{
+    "Beta0": 1, // "Beta0" is the average non-zero value when generating ground truth coefficients.
+    "BetaEps": 0, // "BetaEps" is the variance of non-zero value when generating ground truth.
+    "Threshold": "NaN", // "Threshold" is determines the binarization method. If Threshold = nan, use AIC method; if Threshold is a given value, use that value to threshold recovered coefficients; else if threshold is 'cv', use cross-validation to determine the best threshold value. If using EQO, no need for this field.
+    "requirePositivity": "Off", // Whether require positivity in regressions or not. If using EQO, no need for this field.
+    "RealAbd": "Off", // Whether generating mimic-real abundance data or not.
+    "weight": "On", // Whether weight estimated coefficients in computeAIC or not. if not doing regressions with AIC method, no need for this field.
+    "DiagnosticMod": "Off", // If "DiagnosticMod" is "On", storing extra results for diagnostics.
+    "maxLambda": 10, // Maximum number of lambda parameter in the cross-validation of LASSO/ Ridge/ other regressions. If using OLS or EQO, no need for this field.
+    "usePhylogeny": "Off" // If "usePhylogeny" is "On", incorporating phylogenetic information to regressions. Not needed if using EQO, or if generated synthetic data is phylogenetically-independent (phylogenyDependency = 0).
+}
+```

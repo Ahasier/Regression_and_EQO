@@ -1,4 +1,4 @@
-function [TCM, importanceValues, crossValidatedCoefficients] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
+function [TCM, importanceValues, crossValidatedCoefficients] = computeRegressionAndCrossValidation(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin)
 % COMPUTEREGRESSIONANDCROSSVALIDATION integrates the regression and cross-validation processes.
 % 
 % INPUTS:
@@ -12,7 +12,7 @@ function [TCM, importanceValues, crossValidatedCoefficients] = computeRegression
 %   Various metrics related to the integrated regression and cross-validation process, including coefficients, out-of-sample errors, R-squared values, and optimal thresholds.
 
 % 1. Get table of candidate models (TCM)
-[TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings);
+[TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin{:});
 
 % Check if threshold method is 'cv'
 if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
@@ -31,14 +31,14 @@ end
 end
 
 %% Helper functions
-function [TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings)
+function [TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin)
 % Initialize TCM and other variables
 numTaxa = size(abundanceData, 2);
 TCM = initializeTCM(numTaxa, numPermutations);
 optimalGroupSizes = zeros(1, numPermutations);
 
 % Determine which method to use based on settings.Threshold
-[trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings);
+[trainingMethod, varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin{:});
 
 for i = 1:numPermutations
     % Step (a): Split data
@@ -46,11 +46,11 @@ for i = 1:numPermutations
     
     % Check if testData and testOutput need to be added to varargin
     if addTestData
-        [varargin{end + 1:end + 2}] = deal(testData, testOutput);
+        [varargToMethod{end + 1:end + 2}] = deal(testData, testOutput);
     end
     
     % Step (b): Depending on the threshold value, use regressions or EQO to train on training data
-    [coefficients, optimalGroupSizes(i)] = trainingMethod(trainingData, trainingOutput, varargin{:});
+    [coefficients, optimalGroupSizes(i)] = trainingMethod(trainingData, trainingOutput, varargToMethod{:});
     
     % Step (c): Calculate the out of sample R^2 on test subset
     R2OutSamples = computeRSquared(testData, testOutput, coefficients);
@@ -81,7 +81,7 @@ colNames = strcat('Assemblage_', arrayfun(@num2str, 1:numPermutations, 'UniformO
 TCM.Properties.VariableNames = colNames;
 end
 
-function [trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings)
+function [trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings, extraPhyloVars)
 if strcmp(regressionMethod, 'EQO')
     trainingMethod = @runEQO;
     varargin = {};
@@ -89,11 +89,17 @@ if strcmp(regressionMethod, 'EQO')
 else
     varargin = {regressionMethod, settings};
     trainingMethod = @runRegression;
+    
+    % If doing regressions other than OLS, add testData and testOutput for
+    % the cross-validation of the lambda parameter
     if ~strcmp(regressionMethod, 'OLS')
-        addTestData = true; % Set the flag to true if testData and testOutput need to be added
+        addTestData = true;
     else
         addTestData = false;
     end
+    
+    % Check if phylogenetic information needs to be incorporated. If so,
+    % pass extra variables related to that into trainingMethod
     if isfield(settings, 'usePhylogeny') && strcmp(settings.usePhylogeny, 'On')
         [varargin{end + 1}] = extraPhyloVars;
     end

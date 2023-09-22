@@ -1,4 +1,4 @@
-function [settings, fullIdentifier] = setOptionsAndNames(varargin)
+function [settings, fullIdentifier] = setOptionsAndNames()
 % SETOPTIONSANDNAES configures options and creates a unique identifier string.
 % INPUTS:
 %   varargin: Name-value pairs for setting various options
@@ -6,29 +6,15 @@ function [settings, fullIdentifier] = setOptionsAndNames(varargin)
 %   settings: A structure containing the configuration settings
 %   fullIdentifier: A unique identifier string based on the options
 
-% Confirm that an even number of input arguments have been provided.
-% Otherwise, it’s an error.
-if mod(length(varargin), 2) ~= 0
-    error('Expected input arguments in name-value pairs.');
-end
+% Load the configuration settings from config.json
+fid = fopen('configurations/config.json', 'r');
+rawData = fread(fid, inf, '*char')';
+fclose(fid);
+settings = jsondecode(rawData);
 
-% Initialize options as an empty struct
-settings = struct();
-
-% Set default values
-settings.Beta0 = 1;
-settings.BetaEps = 0;
-settings.Threshold = nan;
-settings.requirePositivity = 'Off';
-settings.RealAbd = 'Off';
-settings.DiagnosticMod = 'Off';
-settings.maxLambda = 10;
-settings.usePhylogeny = 'Off';
-
-% Populate the settings struct with name-value pairs
-for i = 1:2:length(varargin)
-    % varargin{i} is the option, varargin{i+1} is the value
-    settings.(varargin{i}) = varargin{i+1};
+% Convert string "NaN" to MATLAB NaN
+if isfield(settings, 'Threshold') && strcmp(settings.Threshold, 'NaN')
+    settings.Threshold = NaN;
 end
 
 % Initialize fullIdentifier as an empty string

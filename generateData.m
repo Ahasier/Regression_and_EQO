@@ -1,4 +1,4 @@
-function [taxaAbundance, functionalOutput, syntheticCoefficients, extraPhyloVars] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings)
+function [taxaAbundance, functionalOutput, extraArgOut] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings)
 % GENERATEDATA loads real data or generates synthetic data based on the provided parameters for regression analysis.
 %
 % INPUTS:
@@ -20,19 +20,20 @@ if usingRealData(settings)
     % Load real data from a file or database
     [taxaAbundance, functionalOutput] = loadRealData(numberOfSamples);
     % For real data, synthetic coefficients are not applicable, so return empty
-    syntheticCoefficients = [];
+    extraArgOut = {};
 else
     % Generate synthetic data based on the input parameters and settings
     % This include generating synthetic microbial abundance data,
     % synthetic functional output data, and the true coefficients used to generate this synthetic data
     [taxaAbundance, functionalOutput, syntheticCoefficients] = generateSyntheticData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numberOfSamples, settings);
+    extraArgOut = {syntheticCoefficients};
 end
 
 % If phylogenetic information is incorporated, use the grouping method to
 % generate the grouped abundance to handle it.
 if useExtraFeatures(settings)
+    extraPhyloVars.numTaxa = size(taxaAbundance, 2);
     [taxaAbundance, extraPhyloVars.addedLeaves, extraPhyloVars.Idx] = groupAbundanceData(taxaAbundance, get(treeData));
-else
-    extraPhyloVars = struct();
+    [extraArgOut{end + 1}] = extraPhyloVars;
 end
 end
