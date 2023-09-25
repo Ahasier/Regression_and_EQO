@@ -7,7 +7,7 @@ function [settings, fullIdentifier] = setOptionsAndNames()
 %   fullIdentifier: A unique identifier string based on the options
 
 % Load the configuration settings from config.json
-fid = fopen('configurations/config.json', 'r');
+fid = fopen('configurations/settingsConfig.json', 'r');
 rawData = fread(fid, inf, '*char')';
 fclose(fid);
 settings = jsondecode(rawData);

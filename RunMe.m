@@ -1,11 +1,16 @@
-clc;clear
+clc; clear;
 
-%% Set paths and parameters
-% Add neccessary paths
+% Initialize paths
 initializePaths();
 
-% Set parameters and input arguments
-[numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup_list, numSamples_list, meshGrid, regressionMethod] = setParams();
+% Set parameters from JSON file
+paramsFilename = 'configurations/basicParams.json';
+[numPermutations, phylogenyDependency, noiseLevel, meshGrid, regressionMethod] = setParams(paramsFilename);
+
+numberOfTaxaInAGroup_list = [10 30 50];
+numSamples_list = [40 80 120];
+
+% Set other parameters using setOptionsAndNames function
 [settings, fullIdentifier] = setOptionsAndNames();
 
 % Define global variable paths for where to load data or store results
@@ -17,7 +22,7 @@ if strcmp(regressionMethod, 'EQO')
     setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
 end
 
-%% Run computeAndSaveRegressionResults to get results files
+% Run computeAndSaveRegressionResults to get results files
 for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
     for numSamples = numSamples_list
         results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, settings, fullIdentifier);
@@ -31,25 +36,6 @@ readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, ful
 plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 %% Helper functions
-function initializePaths()
-functionsPath = [pwd, '/functions/'];
-addpath(functionsPath);
-end
-
-function [numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup_list, numSamples_list, meshGrid, regressionMethod] = setParams()
-numPermutations = 100; % Average over 100 permutations
-phylogenyDependency = 3; % Groung truth beta's are Phylogenetically irrelavent
-noiseLevel = 1; % Noise level = 1
-
-numberOfTaxaInAGroup_list = [10 30 50]; % Set the number of taxa within a syntetic functional group
-numSamples_list = [40 80 120]; % Set the number of samples
-
-meshGrid.TaxaGroup = 5; % The results map use a mesh grid of 5:5:50 numberOfTaxaInAGroup
-meshGrid.Samples = 10; % The results map use a mesh grid of 10:10:200 numSamples
-
-regressionMethod = 'OLS';
-end
-
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
 % load OLSBeta0Map and EQOMap from file
 OLSBeta0Map = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier, 'Load');

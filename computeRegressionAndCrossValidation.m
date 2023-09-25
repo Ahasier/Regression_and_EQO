@@ -90,7 +90,7 @@ end
 function [trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings, extraPhyloVars)
 if strcmp(regressionMethod, 'EQO')
     trainingMethod = @runEQO;
-    varargin = {};
+    varargin = {settings};
     addTestData = false;
 else
     varargin = {regressionMethod, settings};

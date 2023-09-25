@@ -1,4 +1,4 @@
-function [binaryCoefficients, optimalGroupSize] = runEQO(trainingData, trainingOutput)
+function [binaryCoefficients, optimalGroupSize] = runEQO(trainingData, trainingOutput, settings)
 % Initialze variables
 numTaxa = size(trainingData, 2);
 aicValues = zeros(1, numTaxa);
@@ -35,7 +35,7 @@ for groupSize = 1:numTaxa
     [~, sortedTaxaIndices] = sort(coefficients, 'descend');
     
     % calculate the AIC value in this group size.
-    aicValues(groupSize) = computeAIC(groupSize, numTaxa, trainingData, trainingOutput, sortedTaxaIndices);
+    aicValues(groupSize) = computeAIC(groupSize, numTaxa, trainingData, trainingOutput, sortedTaxaIndices, settings);
     
     % Store coefficients results
     allCoefficients(:, groupSize) = coefficients;
