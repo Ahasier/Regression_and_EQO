@@ -33,7 +33,7 @@ end
 % generate the grouped abundance to handle it.
 if useExtraFeatures(settings)
     extraPhyloVars.numTaxa = size(taxaAbundance, 2);
-    [taxaAbundance, extraPhyloVars.addedLeaves, extraPhyloVars.Idx] = groupAbundanceData(taxaAbundance, get(treeData));
+    [extraPhyloVars.numBranches, extraPhyloVars.addedLeaves, extraPhyloVars.Idx] = groupPhylogeny(get(treeData));
     [extraArgOut{end + 1}] = extraPhyloVars;
 end
 end

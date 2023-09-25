@@ -3,7 +3,7 @@
     "BetaEps": 0,
     "Threshold": "NaN",
     "requirePositivity": "Off",
-    "RealAbd": "Off",
+    "RealAbd": "On",
     "weight": "On",
     "usePhylogeny": "On"
 }

@@ -44,6 +44,12 @@ for i = 1:numPermutations
     % Step (a): Split data
     [trainingData, testData, trainingOutput, testOutput] = splitData(abundanceData, functionalOutput);
     
+    % If incorporating phylogeny, using the grouped training abundance data
+    if useExtraFeatures(settings)
+        extraPhyloVars = varargin{end};
+        trainingData = groupAbundanceData(trainingData, extraPhyloVars.numBranches, extraPhyloVars.addedLeaves, extraPhyloVars.Idx);
+    end
+    
     % Check if testData and testOutput need to be added to varargin
     if addTestData
         [varargToMethod{end + 1:end + 2}] = deal(testData, testOutput);
