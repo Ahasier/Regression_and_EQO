@@ -3,6 +3,6 @@
     "BetaEps": 0,
     "Threshold": "NaN",
     "requirePositivity": "On",
-    "RealAbd": "On",
+    "RealAbd": "Off",
     "weight": "On"
 }

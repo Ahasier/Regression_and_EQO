@@ -1,8 +1,7 @@
 {
-    "numPermutations": 100,
+    "numPermutations": 1,
     "phylogenyDependency": 0,
     "noiseLevel": 1,
-    "regressionMethod": "EQO",
     "meshGrid": {
         "TaxaGroup": 5,
         "Samples": 10

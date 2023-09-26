@@ -1,10 +1,10 @@
-function results = RunParallel(numberOfTaxaInAGroup, numSamples)
+function results = RunParallel(numberOfTaxaInAGroup, numSamples, regressionMethod)
 % Initialize paths
 initializePaths();
 
 % Set parameters from JSON file
 paramsFilename = 'configurations/basicParams.json';
-[numPermutations, phylogenyDependency, noiseLevel, meshGrid, regressionMethod] = setParams(paramsFilename);
+[numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
 
 % Set other parameters using setOptionsAndNames function
 [settings, fullIdentifier] = setOptionsAndNames();

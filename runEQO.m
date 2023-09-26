@@ -35,7 +35,7 @@ for groupSize = 1:numTaxa
     [~, sortedTaxaIndices] = sort(coefficients, 'descend');
     
     % calculate the AIC value in this group size.
-    aicValues(groupSize) = computeAIC(groupSize, numTaxa, trainingData, trainingOutput, sortedTaxaIndices, settings);
+    aicValues(groupSize) = computeAIC(groupSize, trainingData, trainingOutput, coefficients, sortedTaxaIndices, settings);
     
     % Store coefficients results
     allCoefficients(:, groupSize) = coefficients;

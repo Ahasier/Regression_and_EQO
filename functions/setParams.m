@@ -1,4 +1,4 @@
-function [numPermutations, phylogenyDependency, noiseLevel, meshGrid, regressionMethod] = setParams(paramsFilename)
+function [numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename)
 % Load configuration from JSON file
 params = jsondecode(fileread(paramsFilename));
 
@@ -7,5 +7,4 @@ numPermutations = params.numPermutations;
 phylogenyDependency = params.phylogenyDependency;
 noiseLevel = params.noiseLevel;
 meshGrid = params.meshGrid;
-regressionMethod = params.regressionMethod;
 end

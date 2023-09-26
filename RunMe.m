@@ -5,7 +5,9 @@ initializePaths();
 
 % Set parameters from JSON file
 paramsFilename = 'configurations/basicParams.json';
-[numPermutations, phylogenyDependency, noiseLevel, meshGrid, regressionMethod] = setParams(paramsFilename);
+[numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
+
+regressionMethod = 'EQO';
 
 numberOfTaxaInAGroup_list = [10 30 50];
 numSamples_list = [40 80 120];
