@@ -7,7 +7,7 @@ initializePaths();
 paramsFilename = 'configurations/basicParams.json';
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
 
-regressionMethod = 'OLS';
+regressionMethod = 'EQO';
 
 numberOfTaxaInAGroup_list = [10 30 50];
 numSamples_list = [40 80 120];
