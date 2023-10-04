@@ -11,7 +11,7 @@ taxaIndices = 1:100;
 assemblageIndices = 1:100;
 
 % Create a new figure with specified renderer and position
-figure('Renderer', 'painters', 'Position', [0 0 800 1000]);
+figure('Renderer', 'painters', 'Position', [0 0 1000 1000]);
 
 % Loop through each taxa group size
 for m = 1:length(numberOfTaxaInAGroup_list)
@@ -24,8 +24,12 @@ for m = 1:length(numberOfTaxaInAGroup_list)
         % Read the TCM table for the given parameters
         [TCM, R2] = readTCMTable(regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples);
         
+        % Read the ground truth from results for the given parameters
+        results = loadResults(regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples);
+        groundTruth = results.syntheticCoefficients > 0;
+        
         % Plot the TCM and R^2 values
-        plotTCM(TCM, R2, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
+        plotTCM(TCM, R2, groundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
     end
 end
 
@@ -48,37 +52,59 @@ TCM = TCMtable(1:end - 1, :);
 R2 = TCMtable(end, :);
 end
 
-function plotTCM(TCM, R2, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list)
+function plotTCM(TCM, R2, groundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list)
 % Define the number of rows and columns for your subplots
 nh = length(numberOfTaxaInAGroup_list); % number of rows
 nw = length(numSamples_list); % number of columns
 
 % Define margins for spacing around subplots
-marginWidth = 0.07;
+marginWidth = 0.1;
 marginHeight = 0.04;
 gapBetweenPlots = 0.04; % Additional gap between R^2 and TCM plots
+marginWidthGroundTruth = 0.02;
 
-% Adjusted width and height for TCM and R2 subplots
-width = (1 - (nw + 1) * marginWidth) / nw; % Distribute the margin width evenly among subplots
-heightTCM = (1 - (1.4 * nh) * marginHeight - gapBetweenPlots * (nh-1)) / (1.4 * nh); % Adjust height considering the additional gap
+% Adjusted width and height for TCM, R2, and groundTruth subplots
+widthGroundTruth = 0.01; % Narrow width for groundTruth heatmap
+widthTCM = (1 - (nw + 1) * marginWidth - widthGroundTruth) / nw; % Adjusted width for TCM considering groundTruth width
+heightTCM = (1 - (1.4 * nh) * marginHeight - gapBetweenPlots * (nh-1)) / (1.4 * nh);
 heightR2 = heightTCM / 20;  % Make R2 height 1/20th of TCM height
 
 % Calculate the left and bottom positions for the subplots
-left = (n-1) * (width + marginWidth) + marginWidth;
-bottomR2 = 1 - (m * (heightTCM + heightR2 + 2 * marginHeight + gapBetweenPlots)); % Position for R^2 plot
-bottomTCM = bottomR2 + heightR2 + marginHeight; % Position for TCM plot
+leftTCM = (n-1) * (widthTCM + marginWidth + widthGroundTruth) + marginWidth; % Position for TCM plot
+leftGroundTruth = leftTCM + widthTCM + marginWidthGroundTruth; % Position for groundTruth plot to the right of TCM
+bottomR2 = 1 - (m * (heightTCM + heightR2 + 2 * marginHeight + gapBetweenPlots));
+bottomTCM = bottomR2 + heightR2 + marginHeight;
 
 % Create the TCM subplot
-ax1 = axes('Position', [left, bottomTCM, width, heightTCM]);
+ax1 = axes('Position', [leftTCM, bottomTCM, widthTCM, heightTCM]);
 imagesc(assemblageIndices, taxaIndices, TCM);
-title(['TCM (', regressionMethod, ', K', num2str(numberOfTaxaInAGroup), ', nSpl', num2str(numSamples), ')'],  'fontsize', 18);
+
+% Adjust the title position for TCM
+titleObjTCM = title(['TCM (', regressionMethod, ', K', num2str(numberOfTaxaInAGroup), ', nSpl', num2str(numSamples), ')'],  'fontsize', 18);
+titlePosTCM = get(titleObjTCM, 'Position');
+set(titleObjTCM, 'Position', [titlePosTCM(1) - 6, titlePosTCM(2), titlePosTCM(3)]); % Adjust the value '5' as needed
+
 if n == 1
     ylabel("Taxa index", 'fontsize', 18);
 end
 ax1 = plotstyle(gca);
 
+% Create the groundTruth subplot
+ax0 = axes('Position', [leftGroundTruth, bottomTCM, widthGroundTruth, heightTCM]);
+imagesc(1, taxaIndices, groundTruth);
+
+% Hide the ticks for groundTruth
+set(ax0, 'XTick', [], 'YTick', []);
+
+% Adjust the title position for groundTruth
+titleObj = title('Ground Truth', 'fontsize', 18);
+titlePos = get(titleObj, 'Position');
+set(titleObj, 'Position', [titlePos(1) + 1.5, titlePos(2), titlePos(3)]);
+
+ax0 = plotstyle(gca);
+
 % Create the R2 subplot
-ax2 = axes('Position', [left, bottomR2, width, heightR2]);
+ax2 = axes('Position', [leftTCM, bottomR2, widthTCM, heightR2]);
 imagesc(assemblageIndices, 1, R2);
 if n == 1
     ylabel("R^2", 'fontsize', 18);

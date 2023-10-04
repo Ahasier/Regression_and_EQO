@@ -1,12 +1,12 @@
 args <- commandArgs(trailingOnly = TRUE)
 group_size <- as.integer(args[1])
-
-# Initialize data_split as a list
-data_split <- list()
+training_data_filename <- args[2]
+training_output_filename <- args[3]
+coefficients_filename <- args[4]
 
 # Read training data and output from CSV files
-M <- as.matrix(read.csv('EQO/data/trainingData.csv', header=FALSE))
-y <- as.matrix(read.csv('EQO/data/trainingOutput.csv', header=FALSE))
+M <- as.matrix(read.csv(training_data_filename, header=FALSE))
+y <- as.matrix(read.csv(training_output_filename, header=FALSE))
 
 # Source the required R script
 source("EQO/EQOFunctions/EQO_GA.R")
@@ -15,4 +15,4 @@ source("EQO/EQOFunctions/EQO_GA.R")
 result <- EQ_optim('c', M, y, Nmax = group_size, amin=0, amax=1, popSize=100, maxIter=200, parallel=TRUE, monitor=FALSE)
 
 # Save the coefficients to a CSV file for MATLAB to read
-write.csv(result$x, 'data/coefficients.csv', row.names=FALSE)
+write.csv(result$x, coefficients_filename, row.names=FALSE)

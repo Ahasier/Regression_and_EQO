@@ -1,5 +1,5 @@
 {
-    "numPermutations": 1,
+    "numPermutations": 100,
     "phylogenyDependency": 0,
     "noiseLevel": 1,
     "meshGrid": {
