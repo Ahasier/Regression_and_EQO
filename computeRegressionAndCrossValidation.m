@@ -128,5 +128,6 @@ for taxonIdx = 1:numTaxa
 end
 
 % Normalize to the maximal importance
-normalizedCumulativeR2 = (cumulativeR2 - min(cumulativeR2))./(max(cumulativeR2) - min(cumulativeR2));
+normalizedCumulativeR2 = cumulativeR2./max(cumulativeR2);
+% normalizedCumulativeR2 = (cumulativeR2 - min(cumulativeR2))./(max(cumulativeR2) - min(cumulativeR2));
 end
