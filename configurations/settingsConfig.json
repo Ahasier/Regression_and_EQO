@@ -2,6 +2,6 @@
     "Beta0": 1,
     "BetaEps": 0,
     "Threshold": "NaN",
-    "requirePositivity": "On",
+    "requirePositivity": "Off",
     "weight": "On"
 }

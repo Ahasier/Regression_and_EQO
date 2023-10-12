@@ -28,7 +28,7 @@ end
 function [groupingMethod, vararginToMethod] = determineGroupingMethod(settings)
 if isnan(settings.Threshold)
     groupingMethod = @runAIC;
-    vararginToMethod = {settings};
+    vararginToMethod = {};
 else
     groupingMethod = @runThreshold;
     vararginToMethod = {settings};

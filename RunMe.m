@@ -7,10 +7,10 @@ initializePaths();
 paramsFilename = 'configurations/basicParams.json';
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
 
-regressionMethod = 'EQO';
+regressionMethod = 'OLS';
 
 numberOfTaxaInAGroup_list = [10 30 50];
-numSamples_list = [40 80 120];
+numSamples_list = [300 600 900];
 
 % Set other parameters using setOptionsAndNames function
 [settings, fullIdentifier] = setOptionsAndNames();
@@ -43,8 +43,8 @@ function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdenti
 OLSMap = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier, 'Load');
 OLSMap = OLSMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 
-EQOMap = accessToAccMap('results/Accuracy/', 'EQO', fullIdentifier, 'Load');
-EQOMap = EQOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
+% EQOMap = accessToAccMap('results/Accuracy/', 'EQO', fullIdentifier, 'Load');
+% EQOMap = EQOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 
 % fullIdentifier2 = [fullIdentifier(1:end - 2),'n'];
 % OLSBeta0Map2 = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier2, 'Load');
@@ -55,12 +55,12 @@ EQOMap = EQOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/me
 
 % plot heatmaps
 figure('Renderer', 'painters', 'Position', [0 0 1500 320]);
-subplot(1,3,1)
-h1 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO');
+% subplot(1,3,1)
+% h1 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO');
 subplot(1,3,2)
 h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMap, 'OLS');
-subplot(1,3,3)
-h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO', OLSMap, 'OLS');
+% subplot(1,3,3)
+% h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO', OLSMap, 'OLS');
 
 saveas(gcf,['results/plots/Heatmap',fullIdentifier,'.jpg'])
 end
