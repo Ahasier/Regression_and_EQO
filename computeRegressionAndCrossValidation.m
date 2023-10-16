@@ -88,13 +88,14 @@ colNames = strcat('Assemblage_', arrayfun(@num2str, 1:numPermutations, 'UniformO
 TCM.Properties.VariableNames = colNames;
 end
 
-function [trainingMethod, varargin, addTestData] = determineMethod(regressionMethod, settings, extraPhyloVars)
+function [trainingMethod, varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin)
 if strcmp(regressionMethod, 'EQO')
+    numberOfTaxaInAGroup = varargin{1};
     trainingMethod = @runEQO;
-    varargin = {settings};
+    varargToMethod = {settings, numberOfTaxaInAGroup};
     addTestData = false;
 else
-    varargin = {regressionMethod, settings};
+    varargToMethod = {regressionMethod, settings};
     trainingMethod = @runRegression;
     
     % If doing regressions other than OLS, add testData and testOutput for
@@ -108,7 +109,8 @@ else
     % Check if phylogenetic information needs to be incorporated. If so,
     % pass extra variables related to that into trainingMethod
     if isfield(settings, 'usePhylogeny') && strcmp(settings.usePhylogeny, 'On')
-        [varargin{end + 1}] = extraPhyloVars;
+        extraPhyloVars = varargin{1};
+        [varargToMethod{end + 1}] = extraPhyloVars;
     end
 end
 end

@@ -45,9 +45,13 @@ end
 % If using incorporating phylogenetic feature, retrieve the grouped
 % abundance and grouping indices, and pass them to
 % `computeRegressionAndCrossValidation`
+% If using EQO, use `numberOfTaxaInAGroup` to set an appropriate value for
+% N_max, to reduce the computation time. (The two conditions don't coexist)
 if useExtraFeatures(settings)
     extraPhyloVars = varargout{2};
     varargin = extraPhyloVars;
+elseif strcmp(regressionMethod, 'EQO')
+    varargin = numberOfTaxaInAGroup;
 else
     varargin = {};
 end

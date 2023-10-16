@@ -1,4 +1,4 @@
-function [binaryCoefficients, optimalGroupSize] = runRegression(trainingData, trainingOutput, regressionMethod, settings, varargin)
+function [binaryCoefficients, optimalAicValue, optimalGroupSize] = runRegression(trainingData, trainingOutput, regressionMethod, settings, varargin)
 % Step (b) 1: Regression on training data
 coefficients = computeRegression(trainingData, trainingOutput, regressionMethod, settings);
 
@@ -21,7 +21,7 @@ end
 % a given threshold, or cross-validation over different threshold, to get
 % the binary coefficients and optimal group size.
 [groupingMethod, vararginToMethod] = determineGroupingMethod(settings);
-[binaryCoefficients, optimalGroupSize] = groupingMethod(trainingData, trainingOutput, coefficients, vararginToMethod{:});
+[binaryCoefficients, optimalAicValue, optimalGroupSize] = groupingMethod(trainingData, trainingOutput, coefficients, vararginToMethod{:});
 end
 
 %% Helper functions
@@ -35,13 +35,14 @@ else
 end
 end
 
-function [binaryCoefficients, optimalGroupSize] = runThreshold(trainingData, trainingOutput, coefficients, settings)
+function [binaryCoefficients, optimalAicValue, optimalGroupSize] = runThreshold(trainingData, trainingOutput, coefficients, settings)
 % Use certain threshold method to get binary coefficients
 [thresholdMethod, varargin] = determineThresholdMethod(settings);
 binaryCoefficients = thresholdMethod(trainingData, trainingOutput, coefficients, varargin);
 
 % Get group size from the binary coefficients
 optimalGroupSize = getGroupSize(binaryCoefficients);
+optimalAicValue = computeAIC(optimalGroupSize, trainingData, trainingOutput, coefficients(binaryCoefficients));
 end
 
 function [thresholdMethod, varargin] = determineThresholdMethod(settings)

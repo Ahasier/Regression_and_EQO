@@ -1,7 +1,7 @@
-function [binaryCoefficients, optimalGroupSize] = runAIC(trainingData, trainingOutput, coefficients)
+function [binaryCoefficients, optimalAicValue, optimalGroupSize] = runAIC(trainingData, trainingOutput, coefficients)
 % Step (b) 2: Calculate the AIC values under different group sizes to find the optimal one
 aicValues = evaluateAIC(trainingData, trainingOutput, coefficients);
-[~, optimalGroupSize] = findMinimalAic(aicValues);
+[optimalAicValue, optimalGroupSize] = findMinimalAic(aicValues);
 % optimalGroupSize = detectMinimumBeforeDrop(aicValues, 3);
 
 % Step (b) 3: Calculate the binary results sparsified from AIC step
