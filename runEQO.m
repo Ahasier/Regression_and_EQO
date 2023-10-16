@@ -1,4 +1,5 @@
-function [coefficients, aicValue, groupSize] = runEQO(trainingData, trainingOutput)
+function [coefficients, aicValue, groupSize] = runEQO(trainingData, trainingOutput, numberOfTaxaInAGroup)
+maxGroupSize = numberOfTaxaInAGroup + 15;
 
 % Save training data and output to CSV files for R to read
 timestampStr = datestr(now, 'ddmmyy_HHMMSS');
@@ -7,8 +8,6 @@ trainingOutputFilename = ['EQO/data/trainingOutput_', timestampStr, '.csv'];
 
 csvwrite(trainingDataFilename, trainingData);
 csvwrite(trainingOutputFilename, trainingOutput);
-
-maxGroupSize = 60;
 
 % Call R script using system command
 coefficientsFilename = ['EQO/data/coefficients_', timestampStr, '_', num2str(maxGroupSize), '.csv'];

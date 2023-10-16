@@ -92,7 +92,7 @@ function [trainingMethod, varargToMethod, addTestData] = determineMethod(regress
 if strcmp(regressionMethod, 'EQO')
     numberOfTaxaInAGroup = varargin{1};
     trainingMethod = @runEQO;
-    varargToMethod = {settings, numberOfTaxaInAGroup};
+    varargToMethod = {numberOfTaxaInAGroup};
     addTestData = false;
 else
     varargToMethod = {regressionMethod, settings};
