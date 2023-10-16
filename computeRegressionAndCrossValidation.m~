@@ -114,12 +114,9 @@ end
 end
 
 function optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa)
-allAicValues = zeros(numTaxa, 1);
 for n = 1:numTaxa
-    idxGroupSizeN = (groupSizes == n);
-    allAicValues(n) = mean(aicValues(idxGroupSizeN));
+    aicValues{n}(end + 1) = 
 end
-[~, optimalGroupSize] = min(allAicValues);
 end
 
 function importanceValues = getImportanceValues(TCM)

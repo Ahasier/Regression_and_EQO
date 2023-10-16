@@ -1,7 +1,4 @@
-function [coefficients, aicValues] = runEQO(trainingData, trainingOutput)
-% Initialize variables
-numTaxa = size(trainingData, 2);
-allAicValues = arrayfun(@(x) [], cell(numTaxa,1), 'UniformOutput', false);
+function [coefficients, aicValue, groupSize] = runEQO(trainingData, trainingOutput)
 
 % Save training data and output to CSV files for R to read
 timestampStr = datestr(now, 'ddmmyy_HHMMSS');
@@ -39,13 +36,10 @@ coefficients = csvread(coefficientsFilename, 1, 0);
 groupSize = sum(coefficients > 0);
 
 % Calculate the AIC value in this group size.
-allAicValues{groupSize}(end + 1) = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
+aicValue = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
 
 % Delete the intermediate coefficients CSV file
 delete(coefficientsFilename);
-
-% Get the average aic value at each actual group size
-aicValues = averageAicValue(allAicValues);
 
 % Delete the intermediate CSV files
 delete(trainingDataFilename);
