@@ -1,7 +1,5 @@
 {
     "Beta0": 1,
     "BetaEps": 0,
-    "Threshold": "NaN",
-    "requirePositivity": "Off",
-    "weight": "On"
+    "Threshold": "NaN"
 }

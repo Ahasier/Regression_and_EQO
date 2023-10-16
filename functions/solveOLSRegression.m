@@ -10,9 +10,7 @@ function estimatedCoefficients = solveOLSRegression(trainingData, trainingOutput
 % OUTPUT:
 %   estimatedCoefficients: Vector containing the estimated regression coefficients after permutations.
 
-if isfield(settings, 'requirePositivity') && strcmp(settings.requirePositivity, 'Off')
-    estimatedCoefficients = trainingData \ trainingOutput;
-else
+if isfield(settings, 'requirePositivity') && strcmp(settings.requirePositivity, 'On')
     % Construct the optimization problem
     [regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, [], 'OLS', settings);
     
@@ -22,5 +20,7 @@ else
     
     % Get estimated coefficients on current training samples
     estimatedCoefficients = sol.beta;
+else
+    estimatedCoefficients = trainingData \ trainingOutput;
 end
 end

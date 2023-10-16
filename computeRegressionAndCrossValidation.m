@@ -113,21 +113,21 @@ end
 end
 
 function importanceValues = getImportanceValues(TCM)
-% Calculate the cumulative R^2 for each taxon
-importanceValues = calculateCumulativeR2(TCM);
-end
-
-function normalizedCumulativeR2 = calculateCumulativeR2(TCM)
 numTaxa = height(TCM) - 1;
 numAssemblage = width(TCM);
 cumulativeR2 = zeros(numTaxa, 1);
+
+r2 = TCM{end, :};
+r2(r2 < 0) = 0;
+
+% Calculate the cumulative R^2 for each taxon
 for taxonIdx = 1:numTaxa
     for permIdx = 1:numAssemblage
-        cumulativeR2(taxonIdx) = cumulativeR2(taxonIdx) + TCM{taxonIdx, permIdx} * TCM{end, permIdx};
+        cumulativeR2(taxonIdx) = cumulativeR2(taxonIdx) + TCM{taxonIdx, permIdx} * r2(permIdx);
     end
 end
 
 % Normalize to the maximal importance
-normalizedCumulativeR2 = cumulativeR2./max(cumulativeR2);
-% normalizedCumulativeR2 = (cumulativeR2 - min(cumulativeR2))./(max(cumulativeR2) - min(cumulativeR2));
+importanceValues = cumulativeR2./max(cumulativeR2);
+% importanceValues = (cumulativeR2 - min(cumulativeR2))./(max(cumulativeR2) - min(cumulativeR2));
 end

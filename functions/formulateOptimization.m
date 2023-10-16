@@ -13,22 +13,29 @@ function [regressionModel, x0] = formulateOptimization(abundanceSubset, function
 %   regressionModel: An optimization problem object suitable for the specified regression method.
 %   x0: Initial point for the optimization problem.
 
+% Detect is positivity requirement is needed
+if isfield(settings, 'requirePositivity') && strcmp(settings.requirePositivity, 'On')
+    requirePositivity = true;
+else
+    requirePositivity = false;
+end
+
 % Select the appropriate regression model based on the specified method
 switch regressionMethod
     case 'LASSO'
-        [regressionModel, x0] = lassoObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
+        [regressionModel, x0] = lassoObjective(abundanceSubset, functionalOutputSubset, lambda, requirePositivity);
     case 'Ridge'
-        [regressionModel, x0] = ridgeObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
+        [regressionModel, x0] = ridgeObjective(abundanceSubset, functionalOutputSubset, lambda, requirePositivity);
     case 'L0'
         [regressionModel, x0] = l0Objective(abundanceSubset, functionalOutputSubset, lambda, settings.RegPower);
     case 'Nonlinear'
-        [regressionModel, x0] = nonlinearDesignedObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
+        [regressionModel, x0] = nonlinearDesignedObjective(abundanceSubset, functionalOutputSubset, lambda, requirePositivity);
     case 'Combined'
-        [regressionModel, x0] = combinedObjective(abundanceSubset, functionalOutputSubset, lambda, settings.requirePositivity);
+        [regressionModel, x0] = combinedObjective(abundanceSubset, functionalOutputSubset, lambda, requirePositivity);
     case 'Binary'
         [regressionModel, x0] = binaryObjective(abundanceSubset, functionalOutputSubset);
     case 'OLS'
-        [regressionModel, x0] = OLSObjective(abundanceSubset, functionalOutputSubset, settings.requirePositivity);
+        [regressionModel, x0] = OLSObjective(abundanceSubset, functionalOutputSubset, requirePositivity);
 end
 end
 
@@ -167,7 +174,7 @@ x0.beta = zeros(size(trainingData, 2), 1)';
 end
 
 function beta = defineOptimizationVariable(requirePositivity, trainingData)
-if strcmp(requirePositivity, 'On')
+if requirePositivity
     beta = optimvar('beta', size(trainingData, 2), 'LowerBound', 0);
 else
     beta = optimvar('beta', size(trainingData, 2));

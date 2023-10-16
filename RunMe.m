@@ -10,7 +10,7 @@ paramsFilename = 'configurations/basicParams.json';
 regressionMethod = 'OLS';
 
 numberOfTaxaInAGroup_list = [10 30 50];
-numSamples_list = [300 600 900];
+numSamples_list = [100 150 200];
 
 % Set other parameters using setOptionsAndNames function
 [settings, fullIdentifier] = setOptionsAndNames();

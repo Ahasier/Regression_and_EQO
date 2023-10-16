@@ -1,7 +1,8 @@
-function [coefficients, aicValues] = runEQO(trainingData, trainingOutput)
+function [coefficients, aicValues] = runEQO(trainingData, trainingOutput, settings)
 % Initialize variables
-numTaxa = size(trainingData, 2);
-allAicValues = arrayfun(@(x) [], cell(numTaxa,1), 'UniformOutput', false);
+% aicValues = zeros(1, numTaxa);
+allAicValues = arrayfun(@(x) [], cell(100,1), 'UniformOutput', false);
+;
 
 % Save training data and output to CSV files for R to read
 timestampStr = datestr(now, 'ddmmyy_HHMMSS');
@@ -39,7 +40,7 @@ coefficients = csvread(coefficientsFilename, 1, 0);
 groupSize = sum(coefficients > 0);
 
 % Calculate the AIC value in this group size.
-allAicValues{groupSize}(end + 1) = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
+allAicValues{groupSize}(end + 1) = computeAICofTheAssemblage(groupSize, trainingData, trainingOutput, coefficients, settings);
 
 % Delete the intermediate coefficients CSV file
 delete(coefficientsFilename);
