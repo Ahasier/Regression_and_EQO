@@ -119,6 +119,8 @@ end
 % Nonlinear Designed Regression Objective Function
 % Formulate nonlinear designed regression as an optimization problem
 function [prob, x0] = nonlinearDesignedObjective(trainingData, functionalOutput, lambda, requirePositivity)
+threshold = 0.5;
+
 % Define optimization variable for nonlinear designed regression coefficients
 beta = defineOptimizationVariable(requirePositivity, trainingData);
 
@@ -137,12 +139,14 @@ end
 
 % Combined Regression Objective Function
 % Formulate combined regression as an optimization problem
-function [prob, x0] = combinedObjective(trainningData, functionalOutput, lambda, requirePositivity)
+function [prob, x0] = combinedObjective(trainingData, functionalOutput, lambda, requirePositivity)
+threshold = 0.5;
+
 % Define optimization variable for L-combined regression coefficients
 beta = defineOptimizationVariable(requirePositivity, trainingData);
 
 % Compute the residual sum of squares
-residual = trainningData * beta - functionalOutput;
+residual = trainingData * beta - functionalOutput;
 
 % Define the L-combined penalty term
 obj = sum(residual.^2) + sum(combinedPenalty(beta, lambda, threshold));
@@ -151,7 +155,7 @@ obj = sum(residual.^2) + sum(combinedPenalty(beta, lambda, threshold));
 prob = optimproblem('Objective', obj);
 
 % Define the initial point for the optimization algorithm
-x0.beta = zeros(size(trainningData, 2), 1)';
+x0.beta = zeros(size(trainingData, 2), 1)';
 end
 
 % Ordinary Least Squares (OLS) Regression Objective Function

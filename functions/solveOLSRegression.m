@@ -20,6 +20,8 @@ if isfield(settings, 'requirePositivity') && strcmp(settings.requirePositivity, 
     
     % Get estimated coefficients on current training samples
     estimatedCoefficients = sol.beta;
+elseif size(trainingData, 1) == size(trainingData, 2)
+    estimatedCoefficients = pinv(trainingData) * trainingOutput;
 else
     estimatedCoefficients = trainingData \ trainingOutput;
 end

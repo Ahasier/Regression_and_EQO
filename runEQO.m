@@ -1,16 +1,17 @@
 function [coefficients, aicValue, groupSize] = runEQO(trainingData, trainingOutput, numberOfTaxaInAGroup)
 maxGroupSize = numberOfTaxaInAGroup + 15;
+numSamples = 2 * length(trainingOutput);
 
 % Save training data and output to CSV files for R to read
 timestampStr = datestr(now, 'ddmmyy_HHMMSS');
-trainingDataFilename = ['EQO/data/trainingData_', timestampStr, '.csv'];
-trainingOutputFilename = ['EQO/data/trainingOutput_', timestampStr, '.csv'];
+trainingDataFilename = ['EQO/data/trainingData_', num2str(numberOfTaxaInAGroup), '_',num2str(numSamples), '_', timestampStr, '.csv'];
+trainingOutputFilename = ['EQO/data/trainingOutput_', num2str(numberOfTaxaInAGroup), '_',num2str(numSamples), '_', timestampStr, '.csv'];
 
 csvwrite(trainingDataFilename, trainingData);
 csvwrite(trainingOutputFilename, trainingOutput);
 
 % Call R script using system command
-coefficientsFilename = ['EQO/data/coefficients_', timestampStr, '_', num2str(maxGroupSize), '.csv'];
+coefficientsFilename = ['EQO/data/coefficients_', num2str(numberOfTaxaInAGroup), '_',num2str(numSamples), '_', timestampStr, '_', num2str(maxGroupSize), '.csv'];
 commandStr = sprintf('Rscript EQO/EQO_GA_script.R %d %s %s %s', maxGroupSize, trainingDataFilename, trainingOutputFilename, coefficientsFilename);
 system(commandStr);
 
@@ -37,10 +38,8 @@ groupSize = sum(coefficients > 0);
 % Calculate the AIC value in this group size.
 aicValue = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
 
-% Delete the intermediate coefficients CSV file
+% Delete the intermediate CSV file
 delete(coefficientsFilename);
-
-% Delete the intermediate CSV files
 delete(trainingDataFilename);
 delete(trainingOutputFilename);
 end

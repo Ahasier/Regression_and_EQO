@@ -1,5 +1,5 @@
 {
     "Beta0": 1,
-    "BetaEps": 0,
+    "BetaEps": 0.5,
     "Threshold": "NaN"
 }

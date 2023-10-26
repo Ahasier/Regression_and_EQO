@@ -67,7 +67,8 @@ for i = 1:numPermutations
 end
 
 % Determine the optimal group size
-optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa);
+% optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa);
+optimalGroupSize = median(groupSizes);
 end
 
 function TCM = initializeTCM(numTaxa, numPermutations)
@@ -121,7 +122,7 @@ for n = 1:numTaxa
     idxGroupSizeN = (groupSizes == n);
     allAicValues(n) = mean(aicValues(idxGroupSizeN));
 end
-[~, optimalGroupSize] = min(allAicValues);
+[~, optimalGroupSize] = min(allAicValues(1:end - 10));
 end
 
 function importanceValues = getImportanceValues(TCM)

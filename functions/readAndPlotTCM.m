@@ -28,8 +28,11 @@ for m = 1:length(numberOfTaxaInAGroup_list)
         results = loadResults(regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples);
         groundTruth = results.syntheticCoefficients > 0;
         
+        % Arrange TCM and ground truth in descending order
+        [arrangedTCM, arrangedGroundTruth, arrangedR2] = arrangeTCM(TCM, groundTruth, R2);
+        
         % Plot the TCM and R^2 values
-        plotTCM(TCM, R2, groundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
+        plotTCM(arrangedTCM, arrangedR2, arrangedGroundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
     end
 end
 
@@ -50,6 +53,14 @@ TCM = TCMtable(1:end - 1, :);
 
 % Extract the R^2 values (last row)
 R2 = TCMtable(end, :);
+end
+
+function [arrangedTCM, arrangedGroundTruth, arrangedR2] = arrangeTCM(TCM, groundTruth, R2)
+[~, arrangeOrder] = sort(groundTruth, 'descend');
+arrangedGroundTruth = groundTruth(arrangeOrder, :);
+[~, OrderOfR2] = sort(R2,'descend');
+arrangedTCM = TCM(arrangeOrder, OrderOfR2);
+arrangedR2 = R2(OrderOfR2);
 end
 
 function plotTCM(TCM, R2, groundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list)

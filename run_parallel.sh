@@ -15,5 +15,8 @@ regressionMethod=$3
 for numberOfTaxaInAGroup in ${numberOfTaxaInAGroup_list[@]}; do
     for numSamples in ${numSamples_list[@]}; do
         screen -dmS "screen_${numberOfTaxaInAGroup}_${numSamples}" matlab -nodisplay -r "RunParallel($numberOfTaxaInAGroup, $numSamples, '$regressionMethod'); exit;"
+        
+        # Wait for 30 seconds
+        # sleep 30
     done
 done
