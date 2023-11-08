@@ -1,5 +1,6 @@
 function [coefficients, aicValue, groupSize] = runEQO(trainingData, trainingOutput, numberOfTaxaInAGroup)
-maxGroupSize = numberOfTaxaInAGroup + 15;
+% maxGroupSize = numberOfTaxaInAGroup + 15;
+maxGroupSize = 70;
 numSamples = 2 * length(trainingOutput);
 
 % Save training data and output to CSV files for R to read

@@ -49,6 +49,9 @@ for i = 1:numPermutations
     if useExtraFeatures(settings)
         extraPhyloVars = varargin{end};
         trainingData = groupAbundanceData(trainingData, extraPhyloVars.numBranches, extraPhyloVars.addedLeaves, extraPhyloVars.Idx);
+        if addTestData
+            testData = groupAbundanceData(testData, extraPhyloVars.numBranches, extraPhyloVars.addedLeaves, extraPhyloVars.Idx);
+        end
     end
     
     % Check if testData and testOutput need to be added to varargin
@@ -60,6 +63,9 @@ for i = 1:numPermutations
     [coefficients, aicValues(i), groupSizes(i)] = trainingMethod(trainingData, trainingOutput, varargToMethod{:});
     
     % Step (c): Calculate the out of sample R^2 on test subset
+    if useExtraFeatures(settings) && addTestData
+        testData = testData(:, 1:extraPhyloVars.numTaxa);
+    end
     R2OutSamples = computeRSquared(testData, testOutput, coefficients);
     
     % Store results
@@ -68,7 +74,11 @@ end
 
 % Determine the optimal group size
 % optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa);
-optimalGroupSize = median(groupSizes);
+if sum(TCM{end, :} > 0) > 0
+    optimalGroupSize = median(groupSizes(TCM{end, :} > 0));
+else
+    optimalGroupSize = median(groupSizes);
+end
 end
 
 function TCM = initializeTCM(numTaxa, numPermutations)

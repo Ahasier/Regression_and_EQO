@@ -1,28 +1,15 @@
 clc; clear;
 
-% Initialize paths
-initializePaths();
+regressionMethod = 'LASSO';
 
-% Set parameters from JSON file
-paramsFilename = 'configurations/basicParams.json';
-[numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
+numberOfTaxaInAGroup_list = 5:5:50;
+numSamples_list = 10:10:200;
 
-regressionMethod = 'EQO';
+% numberOfTaxaInAGroup_list = 10;
+% numSamples_list = 200;
 
-numberOfTaxaInAGroup_list = [10 30 50];
-numSamples_list = [100 150 200];
-
-% Set other parameters using setOptionsAndNames function
-[settings, fullIdentifier] = setOptionsAndNames();
-
-% Define global variable paths for where to load data or store results
-global paths
-paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');
-
-% If using EQO, add the path to `Rscript` to PATH in MATLAB
-if strcmp(regressionMethod, 'EQO')
-    setenv('PATH', [getenv('PATH') ':/usr/local/bin/']);
-end
+% Initialize all neccessary parametters from configurations files
+[numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings, fullIdentifier] = initializations(regressionMethod);
 
 % Run computeAndSaveRegressionResults to get results files
 % for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
@@ -32,46 +19,71 @@ end
 % end
 
 %% Plot TCMs
-readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
+% readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
 
 %% Plot heatmaps
-% plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 %% Helper functions
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
-% load OLSBeta0Map and EQOMap from file
-OLSMap = accessToAccMap('results/Accuracy/', 'OLS', fullIdentifier, 'Load');
-OLSMap = OLSMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
+% fullIdentifier2 = [fullIdentifier(1:end - 1),'ff'];
+% fullIdentifier1 = '_Beta01_BetaEps0.5_TrNaN_RealAbdOn_usePhylogenyOn';
+% fullIdentifier2 = '_Beta01_BetaEps0.5_TrNaN_RealAbdOn_usePhylogenyOff';
+fullIdentifier01 = [fullIdentifier,'_noise01'];
+fullIdentifier10 = [fullIdentifier,'_noise10'];
 
-EQOMap = accessToAccMap('results/Accuracy/', 'EQO', fullIdentifier, 'Load');
-EQOMap = EQOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
+% load OLSMap and EQOMap from file
+OLSMapNoise1 = loadMapFromFile('OLS', fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+OLSMapNoise01 = loadMapFromFile('OLS', fullIdentifier01, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+OLSMapNoise10 = loadMapFromFile('OLS', fullIdentifier10, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+EQOMapNoise1 = loadMapFromFile('EQO', fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+EQOMapNoise01 = loadMapFromFile('EQO', fullIdentifier01, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+EQOMapNoise10 = loadMapFromFile('EQO', fullIdentifier10, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
-% LASSOMap = accessToAccMap('results/Accuracy/', 'LASSO', [fullIdentifier, '_maxLambda10'], 'Load');
-% LASSOMap = LASSOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
+% OLSMapUsePhylogeny = loadMapFromFile('OLS', fullIdentifier1, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+% LASSOMapUsePhylogeny = loadMapFromFile('LASSO', fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+% EQOMap = loadMapFromFile('EQO', fullIdentifier2, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+% NonlinearMap = loadMapFromFile('Nonlinear', fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 % fullIdentifier2 = [fullIdentifier(1:end - 2),'n'];
-% OLSBeta0Map2 = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier2, 'Load');
-% OLSBeta0Map2 = OLSBeta0Map2(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
-
-% EQOMap = accessToEQOMap(settings.Beta0, settings.BetaEps, 'Load');
-% EQOMap = EQOMap(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 
 % plot heatmaps
 figure('Renderer', 'painters', 'Position', [0 0 1500 320]);
-subplot(1,3,1)
-h1 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO');
-subplot(1,3,2)
-h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMap, 'OLS');
-subplot(1,3,3)
-h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO', OLSMap, 'OLS');
-% subplot(2,3,4)
-% h4 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, LASSOMap, 'LASSO');
-% subplot(2,3,5)
-% h5 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMap, 'OLS', LASSOMap, 'LASSO');
-% subplot(2,3,6)
-% h6 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO', LASSOMap, 'LASSO');
+subplot(2,3,1)
+h1 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapNoise01, 'Noise level 0.1');
+subplot(2,3,2)
+h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapNoise1, 'Noise level 1');
+subplot(2,3,3)
+h3 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapNoise10, 'Noise level 10');
+subplot(2,3,4)
+h4 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMapNoise01, 'Noise level 0.1');
+subplot(2,3,5)
+h5 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMapNoise1, 'Noise level 1');
+subplot(2,3,6)
+h6 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMapNoise10, 'Noise level 10');
 
-saveas(gcf,['results/plots/Heatmap',fullIdentifier,'.jpg'])
+% subplot(2,4,1)
+% h1 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, EQOMap, 'EQO');
+% subplot(2,4,2)
+% h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMap, 'OLS');
+% subplot(2,4,3)
+% h3 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapUsePhylogeny, 'Phylo-regularized OLS');
+% subplot(2,4,4)
+% h4 = plotMap(numberOfTaxaInAGroup_list, numSamples_list, LASSOMapUsePhylogeny, 'Phylo-regularized LASSO');
+% subplot(2,4,5)
+% h5 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapUsePhylogeny, 'Phylo-regularized OLS', OLSMap, 'OLS');
+% subplot(2,4,6)
+% h6 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, LASSOMapUsePhylogeny, 'Phylo-regularized LASSO', OLSMap, 'OLS');
+% subplot(2,4,7)
+% h6 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, OLSMapUsePhylogeny, 'Phylo-regularized OLS', EQOMap, 'EQO');
+% subplot(2,4,8)
+% h6 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list, LASSOMapUsePhylogeny, 'Phylo-regularized LASSO', EQOMap, 'EQO');
+saveas(gcf,['results/plots/Heatmap',fullIdentifier,'_noiseCompare.jpg'])
+end
+
+function Map = loadMapFromFile(regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
+Map = accessToAccMap('results/Accuracy/', regressionMethod, fullIdentifier, 'Load');
+Map = Map(numberOfTaxaInAGroup_list/meshGrid.TaxaGroup, numSamples_list/meshGrid.Samples);
 end
 
 function resultMap = accessToAccMap(resultsPath, regressionMethod, fullIdentifier, saveOrLoad)

@@ -12,7 +12,7 @@ y <- as.matrix(read.csv(training_output_filename, header=FALSE))
 source("EQO/EQOFunctions/EQO_GA.R")
 
 # Execute the EQ_optim function
-result <- EQ_optim('c', M, y, Nmax = group_size, amin=0, amax=1, popSize=100, maxIter=200, parallel=TRUE, monitor=FALSE)
+result <- EQ_optim('c', M, y, Nmax = group_size, amin=0, amax=1, popSize=100, maxIter=200, parallel=FALSE, monitor=FALSE)
 
 # Save the coefficients to a CSV file for MATLAB to read
 write.csv(result$x, coefficients_filename, row.names=FALSE)

@@ -4,14 +4,19 @@ coefficients = computeRegression(trainingData, trainingOutput, regressionMethod,
 
 % If using regressions other than OLS (i.e, LASSO), cross-validate to get the optimal lambda
 if ~strcmp(regressionMethod, 'OLS')
-    testData = varargin{1};
-    testOutput = varargin{2};
+    if length(varargin) == 2
+        testData = varargin{1};
+        testOutput = varargin{2};
+    else
+        testData = varargin{2};
+        testOutput = varargin{3};
+    end
     [coefficients, ~] = crossValidationForLASSO(testData, testOutput, coefficients, settings.maxLambda);
 end
 
 % Handle extra phylogenetic features if needed
 if useExtraFeatures(settings)
-    extraPhyloVars = varargin{end};
+    extraPhyloVars = varargin{1};
     coefficients = handleExtraPhylogeneticFeatures(coefficients, extraPhyloVars.numTaxa, extraPhyloVars.Idx, extraPhyloVars.addedLeaves);
     % Turning `trainingData` back to the ungrouped one for the next step
     trainingData = trainingData(:, 1:extraPhyloVars.numTaxa);

@@ -49,8 +49,8 @@ EQ_optim <- function(pattern, M, y, Nmax = 10, amin = 0, amax = 1, popSize = 100
         })
         y0 <- y - mean(y)
         # Inside EQ_optim function, right before t(M0) %*% y0 is calculated
-        print(dim(M0)) # Prints the dimensions of M0
-        print(length(y0)) # Prints the length of y0
+        # print(dim(M0)) # Prints the dimensions of M0
+        # print(length(y0)) # Prints the length of y0
 
         P <- t(M0) %*% M0
         Q <- t(M0) %*% y0 %*% t(y0) %*% M0
@@ -102,10 +102,10 @@ EQ_optim <- function(pattern, M, y, Nmax = 10, amin = 0, amax = 1, popSize = 100
     )
 
     if (pattern == "c") {
-        x <- as.numeric(GA@solution)
+        x <- as.numeric(GA@solution[1, ])
         y <- max(GA@fitness[!is.na(GA@fitness)])
-        members <- colnames(M0)[GA@solution == 1]
-        abundance <- rowSums(cbind(rep(0, m), rep(0, m), M[, GA@solution == 1]))
+        members <- colnames(M0)[GA@solution[1, ] == 1]
+        abundance <- rowSums(cbind(rep(0, m), rep(0, m), M[, GA@solution[1, ] == 1, drop = FALSE]))
         r <- cor(abundance, y0)^2
         return(list(x = x, members = members, abundance = abundance, y = r))
     }
