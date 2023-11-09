@@ -38,14 +38,25 @@ TCM = initializeTCM(numTaxa, numPermutations);
 aicValues = zeros(1, numPermutations);
 groupSizes = zeros(1, numPermutations);
 
-% Determine which method to use based on settings.Threshold
-[trainingMethod, varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin{:});
+% Prepare arguments for the training method
+[varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin{:});
+
+% Define the function handle for the training method
+if strcmp(regressionMethod, 'EQO')
+    trainingFunction = @(data, output) runEQO(data, output, varargToMethod{:});
+else
+    if addTestData
+        trainingFunction = @(data, output, testData, testOutput) runRegression(data, output, regressionMethod, settings, testData, testOutput);
+    else
+        trainingFunction = @(data, output) runRegression(data, output, regressionMethod, settings);
+    end
+end
 
 for i = 1:numPermutations
     % Step (a): Split data
     [trainingData, testData, trainingOutput, testOutput] = splitData(abundanceData, functionalOutput);
     
-    % If incorporating phylogeny, using the grouped training abundance data
+    % If incorporating phylogeny, modify the training and test data
     if useExtraFeatures(settings)
         extraPhyloVars = varargin{end};
         trainingData = groupAbundanceData(trainingData, extraPhyloVars.numBranches, extraPhyloVars.addedLeaves, extraPhyloVars.Idx);
@@ -54,26 +65,29 @@ for i = 1:numPermutations
         end
     end
     
-    % Check if testData and testOutput need to be added to varargin
+    % Step (b) 1: Get optimized coefficients using the chosen method
     if addTestData
-        [varargToMethod{end + 1:end + 2}] = deal(testData, testOutput);
+        coefficients = trainingFunction(trainingData, trainingOutput, testData, testOutput);
+    else
+        coefficients = trainingFunction(trainingData, trainingOutput);
     end
     
-    % Step (b): Depending on the threshold value, use regressions or EQO to train on training data
-    [coefficients, aicValues(i), groupSizes(i)] = trainingMethod(trainingData, trainingOutput, varargToMethod{:});
+    % Step (b) 2: Apply the grouping method to the coefficients
+    [groupedCoefficients, aicValues(i), groupSizes(i)] = applyGroupingMethod(trainingData, trainingOutput, coefficients, settings);
     
     % Step (c): Calculate the out of sample R^2 on test subset
-    if useExtraFeatures(settings) && addTestData
-        testData = testData(:, 1:extraPhyloVars.numTaxa);
-    end
-    R2OutSamples = computeRSquared(testData, testOutput, coefficients);
+    R2OutSamples = computeRSquared(testData, testOutput, groupedCoefficients);
     
     % Store results
-    TCM{:, i} = [coefficients; R2OutSamples];
+    TCM{:, i} = [groupedCoefficients; R2OutSamples];
 end
 
 % Determine the optimal group size
-% optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa);
+optimalGroupSize = determineOptimalGroupSize(TCM, groupSizes);
+end
+
+function optimalGroupSize = determineOptimalGroupSize(TCM, groupSizes)
+% Logic to determine the optimal group size based on TCM and groupSizes
 if sum(TCM{end, :} > 0) > 0
     optimalGroupSize = median(groupSizes(TCM{end, :} > 0));
 else
@@ -99,15 +113,13 @@ colNames = strcat('Assemblage_', arrayfun(@num2str, 1:numPermutations, 'UniformO
 TCM.Properties.VariableNames = colNames;
 end
 
-function [trainingMethod, varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin)
+function [varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin)
 if strcmp(regressionMethod, 'EQO')
     numberOfTaxaInAGroup = varargin{1};
-    trainingMethod = @runEQO;
     varargToMethod = {numberOfTaxaInAGroup};
     addTestData = false;
 else
     varargToMethod = {regressionMethod, settings};
-    trainingMethod = @runRegression;
     
     % If doing regressions other than OLS, add testData and testOutput for
     % the cross-validation of the lambda parameter
@@ -124,15 +136,6 @@ else
         [varargToMethod{end + 1}] = extraPhyloVars;
     end
 end
-end
-
-function optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa)
-allAicValues = zeros(numTaxa, 1);
-for n = 1:numTaxa
-    idxGroupSizeN = (groupSizes == n);
-    allAicValues(n) = mean(aicValues(idxGroupSizeN));
-end
-[~, optimalGroupSize] = min(allAicValues(1:end - 10));
 end
 
 function importanceValues = getImportanceValues(TCM)

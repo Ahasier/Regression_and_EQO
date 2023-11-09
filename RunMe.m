@@ -1,28 +1,28 @@
 clc; clear;
 
-regressionMethod = 'LASSO';
+regressionMethod = 'EQO';
 
-numberOfTaxaInAGroup_list = 5:5:50;
-numSamples_list = 10:10:200;
+% numberOfTaxaInAGroup_list = 5:5:50;
+% numSamples_list = 10:10:200;
 
-% numberOfTaxaInAGroup_list = 10;
-% numSamples_list = 200;
+numberOfTaxaInAGroup_list = 10;
+numSamples_list = 200;
 
 % Initialize all neccessary parametters from configurations files
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings, fullIdentifier] = initializations(regressionMethod);
 
 % Run computeAndSaveRegressionResults to get results files
-% for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
-%     for numSamples = numSamples_list
-%         results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, settings, fullIdentifier);
-%     end
-% end
+for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
+    for numSamples = numSamples_list
+        results = computeAndSaveRegressionResults(numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod, meshGrid, settings, fullIdentifier);
+    end
+end
 
 %% Plot TCMs
-% readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
+readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
 
 %% Plot heatmaps
-plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+% plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 %% Helper functions
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
