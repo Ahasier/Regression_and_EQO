@@ -1,21 +1,24 @@
-function saveAccuracyToFile(regressionMethod)
-% Initialize paths
-initializePaths();
+function saveAccuracyToFile(regressionMethod, betaEps, realAbd, usePhylogeny)
+% Initialize all neccessary parametters from configurations files
+[~, ~, ~, meshGrid, settings] = initializations(regressionMethod);
 
-% Set parameters from JSON file
-paramsFilename = 'configurations/basicParams.json';
-[~, ~, ~, meshGrid] = setParams(paramsFilename);
+settings.BetaEps = betaEps;
 
-% Define global variable paths for where to load data or store results
-global paths
-paths = SetPathsForDataAndResults('data', 'results', 'betaResults','accuracyResults', 'tcmResults');
+if ~strcmp(realAbd, 'EMPTY_ARRAY')
+    settings.RealAbd = realAbd;
+end
 
-% Set other parameters using setOptionsAndNames function
-[settings, fullIdentifier] = setOptionsAndNames();
+if ~strcmp(usePhylogeny, 'EMPTY_ARRAY')
+    settings.usePhylogeny = usePhylogeny;
+end
+
+% Create a full identifier string based on the options
+fullIdentifier = createIdentifier(settings);
 
 numberOfTaxaInAGroup_list = 5:5:50;
-numSamples_list = 10:10:200;
+numSamples_list = 10:10:280;
 
+global paths
 % Construct the filename where accuracy results will be saved
 accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
 
