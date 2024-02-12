@@ -14,15 +14,18 @@ function estimatedCoefficients = solveUnifiedRegression(trainingData, trainingOu
 Lambda = setLambdaRange(settings.maxLambda);
 estimatedCoefficients = zeros(size(trainingData, 2), length(Lambda));
 
+% Include interception term in the optimization model
+abundanceWithIntercept = [trainingData, ones(size(trainingData, 1), 1)];
+
 for m = 1:length(Lambda)
     % Construct the optimization problem based on the current method and data split
-    [regressionModel, x0] = formulateOptimization(trainingData, trainingOutput, Lambda(m), regressionMethod, settings);
+    [regressionModel, x0] = formulateOptimization(abundanceWithIntercept, trainingOutput, Lambda(m), regressionMethod, settings);
     
     % Configure and solve the optimization problem using Genetic Algorithm (GA)
     opts = optimoptions('ga');
     sol = solve(regressionModel, x0, 'Options', opts);
     
     % Store the estimated coefficients for the current Lambda on current training samples
-    estimatedCoefficients(:, m) = sol.beta;
+    estimatedCoefficients(:, m) = sol.beta(1:end - 1);
 end
 end

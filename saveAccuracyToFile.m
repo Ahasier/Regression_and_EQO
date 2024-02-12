@@ -20,14 +20,14 @@ numSamples_list = 10:10:280;
 
 global paths
 % Construct the filename where accuracy results will be saved
-accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
+accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '_StrongPhylo.csv'];
 
 if ~usingRealData(settings)
     for n = 1:length(numberOfTaxaInAGroup_list)
         numberOfTaxaInAGroup = numberOfTaxaInAGroup_list(n);
         for m = 1:length(numSamples_list)
             numSamples = numSamples_list(m);
-            betaResultsFilePath = [paths.betaResultsPath, 'Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
+            betaResultsFilePath = [paths.betaResultsPath, '/StrongPhylo/Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
             if isfile(betaResultsFilePath)
                 load(betaResultsFilePath, 'results');
                 

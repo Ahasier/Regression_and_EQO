@@ -4,6 +4,8 @@ function [R2, SSR] = computeRSquared(abundanceData, actualOutput, coefficients)
 predictedOutput = abundanceData * coefficients;
 % Compute residuals
 residuals = actualOutput - predictedOutput;
+% % Centering the residuals
+% residualsCentered = residuals - mean(residuals);
 % Compute sum of squared residuals
 SSR = sum((residuals).^2);
 % Compute total sum of squares

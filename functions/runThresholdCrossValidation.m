@@ -3,7 +3,7 @@ function bestCoefficients = runThresholdCrossValidation(trainingData, trainingOu
 crossValidateThresholds = setCrossValidationThreshold(beta0);
 
 % 2. Cross validate over all possible thresholds and get all thresholded coefficients
-[allThresholdedCoefficients, allOutSampleErrors, ~] = handleCrossValidationForOLS(crossValidateThresholds,trainingData, trainingOutput, coefficients);
+[allThresholdedCoefficients, allOutSampleErrors, ~] = crossValidateOverThresholds(crossValidateThresholds,trainingData, trainingOutput, coefficients);
 
 % 3. Find the threshold that gives the minimum out-of-sample error
 [~, idx] = min(allOutSampleErrors(:));

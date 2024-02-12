@@ -1,4 +1,4 @@
-function [numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings, fullIdentifier] = initializations(regressionMethod)
+function [numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings] = initializations(regressionMethod)
 % Initialize paths
 initializePaths();
 
@@ -7,7 +7,7 @@ paramsFilename = 'configurations/basicParams.json';
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid] = setParams(paramsFilename);
 
 % Set other parameters using setOptionsAndNames function
-[settings, fullIdentifier] = setOptionsAndNames();
+settings = setOptionsAndNames();
 
 % Define global variable paths for where to load data or store results
 global paths

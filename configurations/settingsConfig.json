@@ -1,5 +1,8 @@
 {
     "Beta0": 1,
-    "BetaEps": 0,
-    "Threshold": "NaN"
+    "BetaEps": 0.5,
+    "Threshold": "NaN",
+    "maxLambda": 10,
+    "RealAbd": "On",
+    "usePhylogeney": "On"
 }

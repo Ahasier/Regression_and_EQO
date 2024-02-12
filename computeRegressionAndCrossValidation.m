@@ -12,7 +12,7 @@ function [TCM, importanceValues, crossValidatedCoefficients] = computeRegression
 %   Various metrics related to the integrated regression and cross-validation process, including coefficients, out-of-sample errors, R-squared values, and optimal thresholds.
 
 % 1. Get table of candidate models (TCM)
-[TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin{:});
+TCM = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin{:});
 
 % Check if threshold method is 'cv'
 if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
@@ -25,13 +25,13 @@ else
     importanceValues = getImportanceValues(TCM);
     
     % 3. Get the cross-validated coefficients
-    % crossValidatedCoefficients = pickImportanceValue(importanceValues);
-    crossValidatedCoefficients = selectTopKTaxa(importanceValues, optimalGroupSize);
+    crossValidatedCoefficients = pickImportanceValue(importanceValues);
+%     crossValidatedCoefficients = selectTopKTaxa(importanceValues, optimalGroupSize);
 end
 end
 
 %% Helper functions
-function [TCM, optimalGroupSize] = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin)
+function TCM = getTCM(abundanceData, functionalOutput, numPermutations, regressionMethod, settings, varargin)
 % Initialize TCM and other variables
 numTaxa = size(abundanceData, 2);
 TCM = initializeTCM(numTaxa, numPermutations);
@@ -40,6 +40,7 @@ groupSizes = zeros(1, numPermutations);
 
 % Determine which method to use based on settings.Threshold
 [trainingMethod, varargToMethod, addTestData] = determineMethod(regressionMethod, settings, varargin{:});
+lenVararg = length(varargToMethod);
 
 for i = 1:numPermutations
     % Step (a): Split data
@@ -56,7 +57,7 @@ for i = 1:numPermutations
     
     % Check if testData and testOutput need to be added to varargin
     if addTestData
-        [varargToMethod{end + 1:end + 2}] = deal(testData, testOutput);
+        [varargToMethod{lenVararg + 1:lenVararg + 2}] = deal(testData, testOutput);
     end
     
     % Step (b): Depending on the threshold value, use regressions or EQO to train on training data
@@ -67,18 +68,23 @@ for i = 1:numPermutations
         testData = testData(:, 1:extraPhyloVars.numTaxa);
     end
     R2OutSamples = computeRSquared(testData, testOutput, coefficients);
+    % referenceR2s(i) = computeRSquared(testData, testOutput, zeros(size(coefficients, 1), size(coefficients, 2)));
     
     % Store results
     TCM{:, i} = [coefficients; R2OutSamples];
 end
 
+% if sum(TCM{end, :} > 0) == 0
+%     TCM{end, :} = TCM{end, :} - referenceR2s;
+% end
+
 % Determine the optimal group size
 % optimalGroupSize = minimizeAIC(aicValues, groupSizes, numTaxa);
-if sum(TCM{end, :} > 0) > 0
-    optimalGroupSize = median(groupSizes(TCM{end, :} > 0));
-else
-    optimalGroupSize = median(groupSizes);
-end
+% if sum(TCM{end, :} > 0) > 0
+%     optimalGroupSize = median(groupSizes(TCM{end, :} > 0));
+% else
+%     optimalGroupSize = median(groupSizes);
+% end
 end
 
 function TCM = initializeTCM(numTaxa, numPermutations)

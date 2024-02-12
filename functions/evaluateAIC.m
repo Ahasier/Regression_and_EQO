@@ -2,9 +2,9 @@
 function aicc = evaluateAIC(trainingData, trainingOutput, coefficients)
 % Initialization
 % maxNumParameters = sum(coefficients > 0) + 1;
-maxNumParameters = length(coefficients) + 1;
+maxNumParameters = length(coefficients);
 numSamples = length(trainingOutput);
-lenAIC = min(maxNumParameters - 1, numSamples - 2);
+lenAIC = min(maxNumParameters, numSamples - 2);
 aicc = zeros(lenAIC, 1);
 
 % Sort coefficients by descend for later use
@@ -16,11 +16,11 @@ for n = 1:lenAIC
     cappedCoefficients = capCoefficients(coefficients, n, sortedTaxaIndices);
     
     % Compute the aic value of at this group size
-    aicValue = computeAIC(n + 1, trainingData, trainingOutput, cappedCoefficients);
+    numParameters = n + 1;
+    aicValue = computeAIC(numParameters, trainingData, trainingOutput, cappedCoefficients);
     
     % Compute the corrected AICc
-    numParameters = n + 1;
-    aicc(n) = aicValue + 2*(numParameters*(numParameters + 1))/(numSamples - numParameters - 1);
+    aicc(n) = correctAIC(aicValue, numParameters, numSamples);
 end
 end
 

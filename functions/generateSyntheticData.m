@@ -29,8 +29,25 @@ traitValues = evolveTraitsOnTree(covarianceMatrix);
 %% 3. Select traits based on trait values and generate corresponding coefficients
 [syntheticCoefficients, selectedLeaves] = selectTraitsAndGenerateCoefficients(traitValues, numberOfTaxaInAGroup, settings);
 
+% figure();
+% imagesc(covarianceMatrix);
+% set(gca, 'YDir','normal')
+% xlabel('Taxa','fontsize',20)
+% ylabel('Taxa','fontsize',20)
+% title('Covariance matrix','fontsize',22)
+% plotstyle(gca, 1);
+% 
+% view(treeData, selectedLeaves);
+
 %% 4. Generate taxa abundance data
 taxaAbundance = generateAbundanceData(treeStructure, numberOfSamples, settings);
+
+% figure();imagesc(log(taxaAbundance))
+% set(gca, 'YDir','normal')
+% xlabel('Taxa','fontsize',20)
+% ylabel('Sample','fontsize',20)
+% title('log (Mimic-real abundance)','fontsize',22)
+% plotstyle(gca, 1);
 
 %% 5. Construct the observable output using the generated data
 functionalOutput = constructObservableOutput(taxaAbundance, syntheticCoefficients, noiseLevel);
@@ -45,7 +62,9 @@ squareDistanceMatrix = squareform(distanceMatrix);
 if phylogenyDependency == 0
     covarianceMatrix = eye(size(squareDistanceMatrix));
 else
-    covarianceMatrix = exp(-squareDistanceMatrix./phylogenyDependency);
+%     covarianceMatrix = exp(-squareDistanceMatrix./phylogenyDependency);
+    covarianceMatrix = 1 - (squareDistanceMatrix/max(squareDistanceMatrix(:))).^phylogenyDependency;
+%     covarianceMatrix = ones(size(squareDistanceMatrix));
 end
 end
 
@@ -80,7 +99,7 @@ selectedLeaves = (syntheticCoefficients ~= 0);
 end
 
 % Generates synthetic microbial abundance data using either a model to mimic real data or a normal distribution.
-function taxaAbundance = generateAbundanceData(treeData, numberOfSamples, settings)
+function taxaAbundanceCentred = generateAbundanceData(treeData, numberOfSamples, settings)
 % If generating mimic-real abundance data, generate them from the specific long-tail (Pareto) distribution
 if isGeneratingMimicRealAbundance(settings)
     realData = loadRealTreeData().N1;
@@ -89,11 +108,13 @@ else
     % Otherwise, generate abundance data from a random Guassian.
     taxaAbundance = normrnd(10, 10, numberOfSamples, treeData.NumLeaves);
 end
+taxaAbundanceCentred = centerMatrix(taxaAbundance);
 end
 
 % Calculates synthetic functional output data based on synthetic abundance data and coefficients, with added noise.
-function functionalOutput = constructObservableOutput(taxaAbundance, syntheticCoefficients, noiseLevel)
+function functionalOutputCentred = constructObservableOutput(taxaAbundance, syntheticCoefficients, noiseLevel)
 functionalOutput = taxaAbundance * syntheticCoefficients + normrnd(0, noiseLevel, size(taxaAbundance, 1), 1);
+functionalOutputCentred = centerMatrix(functionalOutput);
 end
 
 % Checks the settings to determine whether to mimic real abundance data or generate synthetic abundance data using a normal distribution.
@@ -207,6 +228,22 @@ taxaAbundance = floor(taxaAbundance);
 
 % Normalize abundance table on each row
 % taxaAbundance = taxaAbundance./sum(taxaAbundance,2);
+end
+
+function centeredMatrix = centerMatrix(M)
+% centerMatrix centers a matrix such that the mean of each column is zero.
+%
+% Inputs:
+%   M - A matrix to be centered.
+%
+% Outputs:
+%   centeredMatrix - The centered matrix.
+
+% Calculate the mean of each column
+colMeans = mean(M);
+
+% Subtract the column means from each element in the corresponding column
+centeredMatrix = M - colMeans;
 end
 
 % Set parameter values for the distribution of mimic-real abundance matrix elements.

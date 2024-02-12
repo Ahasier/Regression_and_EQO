@@ -4,6 +4,7 @@ numTaxa = size(trainingData, 2);
 % aicValues = zeros(1, numTaxa);
 allAicValues = arrayfun(@(x) [], cell(numTaxa,1), 'UniformOutput', false);
 allCoefficients = arrayfun(@(x) [], cell(numTaxa,1), 'UniformOutput', false);
+lenAIC = min(numTaxa, length(trainingOutput) - 2);
 
 % maxGroupSize = numberOfTaxaInAGroup + 15;
 numSamples = 2 * length(trainingOutput);
@@ -59,8 +60,11 @@ for maxGroupSize = 1:numberOfTaxaInAGroup + 20
     % Calculate the AIC value in this group size.
     % aicValue = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
     
-    % Calculate the AIC value in this group size.
-    allAicValues{groupSize}(end + 1) = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
+    if groupSize < lenAIC
+        % Calculate the AIC value in this group size.
+        uncorrectedAic = computeAIC(groupSize, trainingData, trainingOutput, coefficients);
+        allAicValues{groupSize}(end + 1) = correctAIC(uncorrectedAic, groupSize, numSamples);
+    end
     
     % Store coefficients results
     allCoefficients{groupSize}(:,end + 1) = coefficients;

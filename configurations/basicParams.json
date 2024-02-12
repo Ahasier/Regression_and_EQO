@@ -1,6 +1,6 @@
 {
     "numPermutations": 100,
-    "phylogenyDependency": 0,
+    "phylogenyDependency": 8,
     "noiseLevel": 1,
     "meshGrid": {
         "TaxaGroup": 5,
