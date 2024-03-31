@@ -14,11 +14,15 @@ function results = computeAndSaveRegressionResults(numPermutations, phylogenyDep
 %
 % Example usage: computeAndSaveRegressionResults(10, 0, 1, 5, 20, 'LASSO', 'maxLambda', 10, 'Threshold', 'cv');
 
-% Load tree data
-treeData = loadTreeData();
-
-% Process data to get results
-results = processData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod);
+if isfield(settings, 'RealAbd') && strcmp(settings.RealAbd, 'On')
+    results = processData(settings, numPermutations, noiseLevel, numSamples, regressionMethod);
+else
+    % Load tree data
+    treeData = loadTreeData();
+    
+    % Process data to get results
+    results = processData(settings, numPermutations, noiseLevel, numSamples, regressionMethod, treeData, phylogenyDependency, numberOfTaxaInAGroup);
+end
 
 % Save results to disk
 saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAGroup, numSamples, settings, meshGrid);
@@ -33,13 +37,29 @@ load([paths.data,'tree100taxa.mat'], 'tree100');
 treeData = tree100;
 end
 
-function results = processData(settings, treeData, numPermutations, phylogenyDependency, noiseLevel, numberOfTaxaInAGroup, numSamples, regressionMethod)
+function results = processData(settings, numPermutations, noiseLevel, numSamples, regressionMethod, varargin)
+% Check the number of inputs
+numInputs = length(varargin);
+
 % 1. Generate Data
-[abundanceData, functionalOutput, varargout] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
+if numInputs == 3
+    treeData = varargin{1};
+    phylogenyDependency = varargin{2};
+    numberOfTaxaInAGroup = varargin{3};
+    [abundanceData, functionalOutput, varargout] = generateData(treeData, phylogenyDependency, numberOfTaxaInAGroup, noiseLevel, numSamples, settings);
+elseif numInputs == 0
+    index = settings.index;
+    [abundanceData, functionalOutput, varargout] = generateDataFromRealSample(index, noiseLevel, settings, numSamples);
+else
+    error("invalid number of varargin.")
+end
 
 % If usimg mock data, retrieve the synthetic coefficients from varargout
 if ~usingRealData(settings)
     syntheticCoefficients = varargout{1};
+    if numInputs == 0
+        numberOfTaxaInAGroup = sum(syntheticCoefficients > 0);
+    end
 end
 
 % If using incorporating phylogenetic feature, retrieve the grouped

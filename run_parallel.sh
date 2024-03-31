@@ -16,13 +16,21 @@ betaEps=$6
 
 # Set a default value for realAbd and usePhylogeny if it is not provided
 realAbd=${7:-"EMPTY_ARRAY"}
-usePhylogeny=${8:-"EMPTY_ARRAY"}
+index_list=(${8:-""})
+usePhylogeny=${9:-"EMPTY_ARRAY"}
 
 # Loop over numberOfTaxaInAGroup_list and numSamples_list and run MATLAB script in parallel using screen
 for numberOfTaxaInAGroup in ${numberOfTaxaInAGroup_list[@]}; do
     for numSamples in ${numSamples_list[@]}; do
-        screen -dmS "screen_${numberOfTaxaInAGroup}_${numSamples}" matlab -nodisplay -r "RunParallel($numberOfTaxaInAGroup, $numSamples, '$regressionMethod', $phylogenyDependency, $noiseLevel, $betaEps, '$realAbd', '$usePhylogeny'); exit;"
-
+        # If index_list is not provided, then run the MATLAB script without index
+        if [ -z "$index_list" ]; then
+            screen -dmS "screen_${numberOfTaxaInAGroup}_${numSamples}" matlab -nodisplay -r "RunParallel($numberOfTaxaInAGroup, $numSamples, '$regressionMethod', $phylogenyDependency, $noiseLevel, $betaEps, '$realAbd', [], '$usePhylogeny'); exit;"
+        else
+            # Loop over index_list and run MATLAB script in parallel using screen
+            for index in ${index_list[@]}; do
+                screen -dmS "screen_${numberOfTaxaInAGroup}_${numSamples}_${index}" matlab -nodisplay -r "RunParallel($numberOfTaxaInAGroup, $numSamples, '$regressionMethod', $phylogenyDependency, $noiseLevel, $betaEps, '$realAbd', $index, '$usePhylogeny'); exit;"
+            done
+        fi
         # Wait for 30 seconds
         # sleep 30
     done

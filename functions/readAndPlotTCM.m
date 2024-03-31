@@ -34,12 +34,12 @@ for m = 1:length(numSamples_list)
         [arrangedTCM, arrangedeImportanceValue, arrangedBinaryResults, arrangedGroundTruth, arrangedR2] = arrangeTCM(TCM, binaryResults, importanceValue, groundTruth, R2);
         
         % Plot the TCM and R^2 values
-        plotTCM(arrangedTCM, arrangedeImportanceValue, arrangedBinaryResults, arrangedR2, arrangedGroundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
+        plotTCM(arrangedTCM, importanceValue, binaryResults, arrangedR2, groundTruth, regressionMethod, taxaIndices, assemblageIndices, n, m, numberOfTaxaInAGroup, numSamples, numberOfTaxaInAGroup_list, numSamples_list);
     end
 end
 
 % Save the figure as a .jpg file in the specified directory
-saveas(gcf, ['results/plots/TCM', regressionMethod, fullIdentifier, '.jpg'])
+saveas(gcf, ['results/plots/realdata_standardized/TCM', regressionMethod, fullIdentifier, '.jpg'])
 end
 
 %% Helper functions
@@ -47,7 +47,7 @@ function [TCM, R2] = readTCMTable(regressionMethod, fullIdentifier, numberOfTaxa
 global paths
 
 % Read the TCM table from saved CSV file
-tcmFilename = [paths.betaResultsPath, 'Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
+tcmFilename = [paths.betaResultsPath, 'realdata_standardized/Betas_', regressionMethod, fullIdentifier, '_nSpl', num2str(numSamples), '.mat'];
 % TCMtable = csvread(tcmFilename, 1, 0);
 load(tcmFilename, 'results');
 TCMtable = results.TCM;
@@ -66,7 +66,7 @@ arrangedeImportanceValue = importanceValue(arrangeOrder, :);
 arrangedBinaryResults = binaryResults(arrangeOrder, :);
 
 [~, OrderOfR2] = sort(R2,'descend');
-arrangedTCM = TCM(arrangeOrder, OrderOfR2);
+arrangedTCM = TCM(:, OrderOfR2);
 arrangedR2 = R2(OrderOfR2);
 end
 
@@ -97,11 +97,18 @@ bottomTCM = bottomR2 + heightR2 + marginHeight;
 
 % Create the TCM subplot
 axTCM = axes('Position', [leftTCM, bottomTCM, widthTCM, heightTCM]);
-imagesc(assemblageIndices, taxaIndices, TCM);
+h = imagesc(assemblageIndices, taxaIndices, TCM);
 title(axTCM, ['TCM (K' num2str(numberOfTaxaInAGroup) ', nSpl' num2str(numSamples) ')']);
 if n == 1
     ylabel(axTCM, "Taxa Index");
 end
+
+% Set the missing data pixels to grey
+h.AlphaData = ones(size(TCM));
+h.AlphaData([7 14 19 23 25 26 30 33 42 46 49 59 61 70 73 80 82 88], :) = 0.2;
+h.AlphaData([12 16 18 32 34 54 66 84 94 96 99], :) = 0.5;
+h.AlphaData([6 13 15 24 27 35 36 44 50 55 78 85 91], :) = 0.7;
+ax = gca; ax.Color = [1 1 1];
 
 % Create the importanceValue subplot
 axImportanceValue = axes('Position', [leftImportanceValue, bottomTCM, widthGroundTruth, heightTCM]);

@@ -17,43 +17,49 @@ function saveResults(results, regressionMethod, fullIdentifier, numberOfTaxaInAG
 % Recall paths for results storage
 global paths
 
+if isfield(settings, 'RealAbd') && strcmp(settings.RealAbd, 'On')
+    fullTag = [regressionMethod, fullIdentifier, '_nSpl', num2str(numSamples)];
+else
+    fullTag = [regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples)];
+end
+
 % Check if threshold method is 'cv'
 if ischar(settings.Threshold) && strcmp(settings.Threshold, 'cv')
 else
     % Write TCM to csv file
-    tcmFilename = [paths.tcmResultsPath, 'TCM_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.csv'];
+    tcmFilename = [paths.tcmResultsPath, 'TCM_', fullTag, '.csv'];
     writetable(results.TCM, tcmFilename);
 end
 
-% Construct the filename where accuracy results will be saved
-accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
-
-if usingRealData(settings)
-    % If using real data, skip this step
-else
-    % Load or initialize existing accuracy results data
-    existingData = loadOrInitializeAccuracyResultsFile(accuracyFilename);
-    
-    % Compute indices to determine where the accuracy result will be stored
-    [index1, index2] = indicesOfAccuracyMatrixElement(numberOfTaxaInAGroup, numSamples, meshGrid);
-    
-    % Check if data needs update
-    %     if dataNeedsUpdate(accuracyFilename, index1, index2)
-    % Check if computed indices are positive integers
-    if index1 <= 0 || floor(index1) ~= index1 || index2 <= 0 || floor(index2) ~= index2
-        error('Invalid indices computed: indices must be positive integers.');
-        % Check if the location specified by the indices is empty or NaN
-    else
-        % Update the specified location with the new accuracy value
-        existingData(index1, index2) = results.accuracy;
-        % Save the updated dataset back to the CSV file
-        csvwrite(accuracyFilename, existingData);
-    end
-    %     end
-end
+% % Construct the filename where accuracy results will be saved
+% accuracyFilename = [paths.accuracyResultsPath, 'Acc', regressionMethod, fullIdentifier, '.csv'];
+% 
+% if usingRealData(settings)
+%     % If using real data, skip this step
+% else
+%     % Load or initialize existing accuracy results data
+%     existingData = loadOrInitializeAccuracyResultsFile(accuracyFilename);
+%     
+%     % Compute indices to determine where the accuracy result will be stored
+%     [index1, index2] = indicesOfAccuracyMatrixElement(numberOfTaxaInAGroup, numSamples, meshGrid);
+%     
+%     % Check if data needs update
+%     %     if dataNeedsUpdate(accuracyFilename, index1, index2)
+%     % Check if computed indices are positive integers
+%     if index1 <= 0 || floor(index1) ~= index1 || index2 <= 0 || floor(index2) ~= index2
+%         error('Invalid indices computed: indices must be positive integers.');
+%         % Check if the location specified by the indices is empty or NaN
+%     else
+%         % Update the specified location with the new accuracy value
+%         existingData(index1, index2) = results.accuracy;
+%         % Save the updated dataset back to the CSV file
+%         csvwrite(accuracyFilename, existingData);
+%     end
+%     %     end
+% end
 
 % Construct the file path where other simulation results will be saved
-betaResultsFilePath = [paths.betaResultsPath, 'Betas_', regressionMethod, fullIdentifier, '_K', num2str(numberOfTaxaInAGroup), '_nSpl', num2str(numSamples), '.mat'];
+betaResultsFilePath = [paths.betaResultsPath, 'Betas_', fullTag, '.mat'];
 
 % Save various results to a MAT file for later analysis
 save(betaResultsFilePath, 'results');

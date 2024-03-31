@@ -1,4 +1,4 @@
-function results = RunParallel(numberOfTaxaInAGroup, numSamples, regressionMethod, phylogenyDependency, noiseLevel, betaEps, realAbd, usePhylogeny)
+function results = RunParallel(numberOfTaxaInAGroup, numSamples, regressionMethod, phylogenyDependency, noiseLevel, betaEps, realAbd, index, usePhylogeny)
 % Initialize all neccessary parametters from configurations files
 [numPermutations, ~, ~, meshGrid, settings] = initializations(regressionMethod);
 
@@ -6,6 +6,7 @@ settings.BetaEps = betaEps;
 
 if ~strcmp(realAbd, 'EMPTY_ARRAY')
     settings.RealAbd = realAbd;
+    settings.index = index;
 end
 
 if ~strcmp(usePhylogeny, 'EMPTY_ARRAY')

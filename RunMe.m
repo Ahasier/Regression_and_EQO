@@ -5,8 +5,8 @@ regressionMethod = 'LASSO';
 % numberOfTaxaInAGroup_list = 5:5:50;
 % numSamples_list = 10:10:200;
 
-numberOfTaxaInAGroup_list = 10;
-numSamples_list = 100;
+numberOfTaxaInAGroup_list = 0;
+numSamples_list = 130;
 
 % Initialize all neccessary parametters from configurations files
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings] = initializations(regressionMethod);
@@ -22,10 +22,10 @@ for numberOfTaxaInAGroup = numberOfTaxaInAGroup_list
 end
 
 %% Plot TCMs
-readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
+% readAndPlotTCM(numberOfTaxaInAGroup_list, numSamples_list, regressionMethod, fullIdentifier)
 
 %% Plot heatmaps
-plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
+% plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
 %% Helper functions
 function plotHeatmapsForRegressionResults(settings, regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)

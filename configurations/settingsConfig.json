@@ -4,5 +4,6 @@
     "Threshold": "NaN",
     "maxLambda": 10,
     "RealAbd": "On",
-    "usePhylogeney": "On"
+    "index": 1,
+    "usePhylogeney": "Off"
 }

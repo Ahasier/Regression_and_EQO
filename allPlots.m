@@ -1,6 +1,7 @@
 numberOfTaxaInAGroup_list = 5:5:50;
 numSamples_list = 10:10:200;
 numSamples_list2 = 10:10:200;
+index_list = 1:25;
 
 % Initialize all neccessary parametters from configurations files
 [numPermutations, phylogenyDependency, noiseLevel, meshGrid, settings] = initializations('OLS');
@@ -14,6 +15,10 @@ numSamples_list2 = 10:10:200;
 % % Figure 4: Comparison between LASSO and EQO on non-binary ground truth and
 % % mimic-real abundance data
 % Figure4(numberOfTaxaInAGroup_list, numSamples_list2, meshGrid);
+
+% Figure4_real(index_list, meshGrid)
+Figure4_real_nonbinarybeta(index_list, meshGrid)
+
 % 
 % % Figure 6: Comparison between phylo-regularized LASSO and EQO on 
 % % phylogenetcally-dependent non-binary ground truth and mimic-real 
@@ -23,19 +28,19 @@ numSamples_list2 = 10:10:200;
 % % Figure S2: Comparison among LASSO and EQO with different noise levels.
 % FigureS2(numberOfTaxaInAGroup_list, numSamples_list, meshGrid);
 
-groupsize_list = [10 30 50];
-samplesize_list = [150 100 50];
-figure('Renderer', 'painters', 'Position', [0 0 1600 1600]);
-for n = 1:3
-    groupsize = groupsize_list(n);
-    for m = 1:3
-        samplesize = samplesize_list(m);
-        
-        subplot(3,3,3*(m-1)+n)
-        [hScatterLASSO, hScatterEQO] = plotVaryEpsilon(groupsize,samplesize);
-        xlim([0 0.5])
-    end
-end
+% groupsize_list = [10 30 50];
+% samplesize_list = [150 100 50];
+% figure('Renderer', 'painters', 'Position', [0 0 1600 1600]);
+% for n = 1:3
+%     groupsize = groupsize_list(n);
+%     for m = 1:3
+%         samplesize = samplesize_list(m);
+%         
+%         subplot(3,3,3*(m-1)+n)
+%         [hScatterLASSO, hScatterEQO] = plotVaryEpsilon(groupsize,samplesize);
+%         xlim([0 0.5])
+%     end
+% end
 
 %% Helper functions
 function Map = loadMapFromFile(regressionMethod, fullIdentifier, numberOfTaxaInAGroup_list, numSamples_list, meshGrid)
@@ -103,6 +108,90 @@ subplot(1,3,2)
 h2 = plotMap(numberOfTaxaInAGroup_list, numSamples_list2, LASSOMapF4, 'LASSO on Phylo-independent data', 1);
 subplot(1,3,3)
 h3 = plotGapMap(numberOfTaxaInAGroup_list, numSamples_list2, EQOMapF4, 'LASS0 on Phylo-dependent data', LASSOMapF4, 'Phylo-independent data', 1);
+end
+
+function Figure4_real(index_list, meshGrid)
+sample_list = 10:10:100;
+
+dataFileName = 'data/subsample1taxa50.mat';
+data = load(dataFileName);
+
+fullIdentifierF4_1 = '_Beta01_BetaEps0_TrNaN_maxLambda10_RealAbdOn_index_usePhylogenyOff'; 
+fullIdentifierF4_2 = '_Beta01_BetaEps0_TrNaN_maxLambda10_RealAbdOn_index_usePhylogenyOn'; 
+Map1 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'LASSO', fullIdentifierF4_1, 'Load');
+Map2 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'LASSO', fullIdentifierF4_2, 'Load');
+Map3 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'EQO', fullIdentifierF4_1, 'Load');
+LASSOMapF4_1 = Map1(index_list, sample_list/meshGrid.Samples);
+LASSOMapF4_2 = Map2(index_list, sample_list/meshGrid.Samples);
+EQOMapF4 = Map3(index_list, sample_list/meshGrid.Samples);
+LASSOMapF4_1(LASSOMapF4_1 == 0) = nan;
+LASSOMapF4_2(LASSOMapF4_2 == 0) = nan;
+EQOMapF4(EQOMapF4 == 0) = nan;
+
+figure();
+subplot(9,3,[1 4 7])
+h.a = plot(data.subtree);
+subplot(9,3,[2 5 8])
+h.b = imagesc(data.prunedbranchedTaxa);
+xlabel('Index of selected branch', 'fontsize', 20)
+ylabel('Taxa', 'fontsize', 20)
+title('Selection of taxa over all possible branches', 'fontsize', 22)
+plotstyle(gca, 1);
+subplot(9,3,[3 6 9])
+h.c = imagesc(log(data.abundanceData'));
+plotstyle(gca, 1);
+xlabel('Samples', 'fontsize', 20)
+ylabel('Taxa', 'fontsize', 20)
+title('Taxa abundance', 'fontsize', 22)
+subplot(9,3,[11 14])
+h.d = plotMap(index_list, sample_list, LASSOMapF4_1, 'LASSO on real data', 1);
+subplot(9,3,[17 20])
+h.e = plotMap(index_list, sample_list, LASSOMapF4_2, 'Phylo-regularized LASSO on real data', 1);
+xlabel('Index of selected branch', 'fontsize', 20)
+subplot(9,3,[23 26])
+h.f = plotMap(index_list, sample_list, EQOMapF4, 'EQO on real data', 1);
+end
+
+function Figure4_real_nonbinarybeta(index_list, meshGrid)
+sample_list = 10:10:100;
+
+dataFileName = 'data/subsample1taxa50.mat';
+data = load(dataFileName);
+
+fullIdentifierF4_1 = '_Beta01_BetaEps0.5_TrNaN_maxLambda10_RealAbdOn_index_usePhylogenyOff'; 
+fullIdentifierF4_2 = '_Beta01_BetaEps0.5_TrNaN_maxLambda10_RealAbdOn_index_usePhylogenyOn'; 
+Map1 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'LASSO', fullIdentifierF4_1, 'Load');
+Map2 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'LASSO', fullIdentifierF4_2, 'Load');
+Map3 = accessToAccMap('results/Accuracy/realdata_standardized_noise0.001/', 'EQO', fullIdentifierF4_1, 'Load');
+LASSOMapF4_1 = Map1(index_list, sample_list/meshGrid.Samples);
+LASSOMapF4_2 = Map2(index_list, sample_list/meshGrid.Samples);
+EQOMapF4 = Map3(index_list, sample_list/meshGrid.Samples);
+LASSOMapF4_1(LASSOMapF4_1 == 0) = nan;
+LASSOMapF4_2(LASSOMapF4_2 == 0) = nan;
+EQOMapF4(EQOMapF4 == 0) = nan;
+
+figure();
+subplot(9,3,[1 4 7])
+h.a = plot(data.subtree);
+subplot(9,3,[2 5 8])
+h.b = imagesc(data.prunedbranchedTaxa);
+xlabel('Index of selected branch', 'fontsize', 20)
+ylabel('Taxa', 'fontsize', 20)
+title('Selection of taxa over all possible branches', 'fontsize', 22)
+plotstyle(gca, 1);
+subplot(9,3,[3 6 9])
+h.c = imagesc(log(data.abundanceData'));
+plotstyle(gca, 1);
+xlabel('Samples', 'fontsize', 20)
+ylabel('Taxa', 'fontsize', 20)
+title('Taxa abundance', 'fontsize', 22)
+subplot(9,3,[11 14])
+h.d = plotMap(index_list, sample_list, LASSOMapF4_1, 'LASSO on real data', 1);
+subplot(9,3,[17 20])
+h.e = plotMap(index_list, sample_list, LASSOMapF4_2, 'Phylo-regularized LASSO on real data', 1);
+xlabel('Index of selected branch', 'fontsize', 20)
+subplot(9,3,[23 26])
+h.f = plotMap(index_list, sample_list, EQOMapF4, 'EQO on real data', 1);
 end
 
 function Figure6(numberOfTaxaInAGroup_list, numSamples_list2, meshGrid)

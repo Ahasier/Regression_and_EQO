@@ -22,6 +22,9 @@ if useExtraFeatures(settings)
     trainingData = trainingData(:, 1:extraPhyloVars.numTaxa);
 end
 
+% % Make the coefficients vs abundance plot and save the data
+% plotAndSaveCoefficientsVsAbundance(coefficients, trainingData, settings.index, 1);
+
 % Step (b) 2: Depending on settings.Threshold, apply either AIC method, or
 % a given threshold, or cross-validation over different threshold, to get
 % the binary coefficients and optimal group size.

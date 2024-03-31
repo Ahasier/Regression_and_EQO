@@ -1,7 +1,7 @@
 {
     "numPermutations": 100,
-    "phylogenyDependency": 8,
-    "noiseLevel": 1,
+    "phylogenyDependency": 0,
+    "noiseLevel": 0.001,
     "meshGrid": {
         "TaxaGroup": 5,
         "Samples": 10
